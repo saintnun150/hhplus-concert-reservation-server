@@ -16,21 +16,9 @@
 
 ## 주요 라이브러리
 
-### 1. Lombok
-- **설명**: 애노테이션을 통한 반복되는 코드 자동완성 기능 제공
-### 2. Spring Boot DevTools
-- **설명**: 코드 변경 시 자동 리로드 개발 편리함
-
-### 3. h2 database
+### 1. h2 database
 - **설명**: 데이터베이스와의 연결 JDBC 드라이버.
-- 
-### 4. Springdoc OpenAPI
+### 2. Springdoc OpenAPI
 - **버전**: 2.5.0
 - **설명**: 자동으로 API 문서를 생성하고 **Swagger UI**를 제공
 
-## 테스트 프레임워크
-### 1. Spring Boot Starter Test
-- **설명**: 통합 테스트 지원 라이브러리
-
-### 2. JUnit Platform Launcher
-- **설명**: JUnit 5 테스트를 실행을 위해 필요
