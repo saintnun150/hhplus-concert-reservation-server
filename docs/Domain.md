@@ -83,3 +83,8 @@
 - `created_at`: 토큰 생성 시간
 - `updated_at`: 갱신 시간
 - `expires_at`: 토큰 만료 예정 시간
+
+
+## ERD
+
+![image](../docs/images/erd.png)
