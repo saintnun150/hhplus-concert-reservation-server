@@ -6,7 +6,7 @@
 
 ## 작업 계획 수립 
  - [마일스톤 문서](./docs/Milestone.md)
- - [기능별 작업 board](https://github.com/users/saintnun150/projects/2/views/1)
+ - [기능별 작업 board](https://github.com/users/saintnun150/projects/1/views/1)
    ![image](./docs/images/project_view.png)
 
 
