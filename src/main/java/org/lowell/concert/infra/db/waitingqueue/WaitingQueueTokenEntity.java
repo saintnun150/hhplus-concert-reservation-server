@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class WaitingQueueTokenEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tokenId;
 
     @Column(name = "token")
