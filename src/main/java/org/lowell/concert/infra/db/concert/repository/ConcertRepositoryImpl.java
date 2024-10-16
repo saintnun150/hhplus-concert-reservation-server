@@ -33,7 +33,6 @@ public class ConcertRepositoryImpl implements ConcertRepository {
         return mapper.toPojo(entity);
     }
 
-
     @Override
     public List<ConcertInfo> getConcerts() {
         List<ConcertEntity> entities = jpaRepository.findAllByDeletedAtIsNull();
