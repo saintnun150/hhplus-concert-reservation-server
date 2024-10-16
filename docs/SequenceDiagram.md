@@ -20,21 +20,14 @@ opt 유효하지 않은 사용자
 	US-->>API: 예외 발생
 end
 deactivate US
-API->>WS: 대기열 토큰 조회
+API->>WS: 토큰 생성 요청
 activate WS
-WS->>DB: find token
-DB->>WS: token
-alt exist
-WS-->>API: 대기열 토큰 정보
+WS->>WS: 토큰 정보 생성
+WS->>DB: token save
+DB-->>WS: token
+WS-->>API: 대기열 토큰 정보 
+deactivate WS
 API-->>U: 반환
-else not exist
-	WS->>WS: 토큰 정보 생성
-	WS->>DB: token save
-	DB-->>WS: token
-	WS-->>API: 대기열 토큰 정보 
-	deactivate WS
-	API-->>U: 반환
-end
 ```
 
 ### 대기열 상태 조회 polling API
@@ -57,8 +50,6 @@ opt 유효하지 않은 토큰
 WS-->>U: 예외 발생
 end
 WS-->>WS: 대기열 정보 확인(순번 체크)
-WS-->>DB: 예약 가능한 순번일 경우 토큰 유효시간(expires_at), state active 갱신
-DB-->>WS: token
 WS-->>API: 토큰 정보(순번 포함)
 deactivate WS
 API-->>U: 반환
@@ -66,7 +57,6 @@ API-->>U: 반환
 
 
 ### 예약 가능 날짜 조회 API
-
 
 ```mermaid
 %% 예약 가능 날짜

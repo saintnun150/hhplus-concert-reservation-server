@@ -78,7 +78,6 @@
 * **WaitingQueueToken** (대기열 토큰 테이블)
 - `token_id` (PK): 대기열 토큰 고유 ID
 - `token`: 대기열 토큰
-- `user_id` (FK): 사용자 ID (User 테이블의 PK)
 - `status`: 대기열 상태 (예: 대기 중, 입장 가능, 만료)
 - `created_at`: 토큰 생성 시간
 - `updated_at`: 갱신 시간
