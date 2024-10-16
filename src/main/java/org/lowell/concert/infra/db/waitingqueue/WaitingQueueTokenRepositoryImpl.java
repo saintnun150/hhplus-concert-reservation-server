@@ -7,10 +7,12 @@ import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueTokenQuery;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueTokenRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -60,6 +62,21 @@ public class WaitingQueueTokenRepositoryImpl implements WaitingQueueTokenReposit
             return 0;
         }
         return count.intValue();
+    }
+
+    @Override
+    public List<WaitingQueueTokenInfo> getTokensByTokenStatusWithLimit(WaitingQueueTokenQuery.Update query) {
+        List<WaitingQueueTokenEntity> tokenEntities = jpaRepository.findTokensByTokenStatusWithLimit(query.tokenStatus(),
+                                                                                              PageRequest.of(0, 5));
+        return mapper.toPojoList(tokenEntities);
+    }
+
+    @Override
+    public void batchUpdateTokenStatus(WaitingQueueTokenCommand.Update command) {
+        jpaRepository.updateAllByTokenIdInAndTokenStatusAndExpiresAt(command.tokenIds(),
+                                                                     command.status(),
+                                                                     command.updatedAt(),
+                                                                     command.expiresAt());
     }
 
 

@@ -9,8 +9,10 @@ import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueTokenRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -40,4 +42,29 @@ public class WaitingQueueTokenService {
                                                                               tokenInfo.getTokenStatus());
         return tokenRepository.getTokenOrder(query);
     }
+
+    public int getTokenCountByStatus(TokenStatus status) {
+        return tokenRepository.getTokenCountByStatus(status);
+    }
+
+    public List<Long> getTokenIdsByTokenStatusWithLimit(WaitingQueueTokenQuery.Update query) {
+        List<WaitingQueueTokenInfo> tokenInfos = tokenRepository.getTokensByTokenStatusWithLimit(query);
+        if (CollectionUtils.isEmpty(tokenInfos)) {
+            throw new WaitingQueueTokenException(WaitingQueueTokenErrorCode.EMPTY_TOKENS);
+        }
+        return tokenInfos.stream()
+                         .map(WaitingQueueTokenInfo::getTokenId)
+                         .toList();
+    }
+
+     public void updateToken(WaitingQueueTokenCommand.Update command) {
+         if (CollectionUtils.isEmpty(command.tokenIds())) {
+             throw new WaitingQueueTokenException(WaitingQueueTokenErrorCode.EMPTY_TOKEN_IDS);
+         }
+         if (command.expiresAt() == null || command.expiresAt().isBefore(LocalDateTime.now())) {
+             throw new WaitingQueueTokenException(WaitingQueueTokenErrorCode.INVALID_TOKEN_EXPIRES_DATE);
+         }
+         tokenRepository.batchUpdateTokenStatus(command);
+     }
+
 }

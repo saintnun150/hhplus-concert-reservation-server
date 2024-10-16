@@ -3,6 +3,7 @@ package org.lowell.concert.domain.waitingqueue.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueTokenCommand;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueTokenErrorCode;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueTokenException;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
@@ -10,6 +11,10 @@ import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueTokenReposi
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -58,5 +63,44 @@ class WaitingQueueTokenServiceTest {
                     assertThat(ex.getErrorCode()).isEqualTo(WaitingQueueTokenErrorCode.NOT_FOUND_TOKEN);
                 });
     }
+
+    @DisplayName("활성 가능한 수만큼 대기상태인 토큰을 조회하였을 때 대기 상태의 토큰이 없으면 예외가 발생한다.")
+    @Test
+    void throwException_when_not_fount_waiting_status_token() {
+        when(tokenRepository.getTokensByTokenStatusWithLimit(null))
+                .thenReturn(Collections.emptyList());
+
+        assertThatThrownBy(() -> tokenService.getTokenIdsByTokenStatusWithLimit(null))
+                .isInstanceOfSatisfying(WaitingQueueTokenException.class, ex -> {
+                    assertThat(ex.getErrorCode()).isEqualTo(WaitingQueueTokenErrorCode.EMPTY_TOKENS);
+                });
+    }
+
+    @DisplayName("대기 상태인 토큰들을 활성화 시킬 때 토큰 PK 목록이 없을 경우 예외가 발생한다.")
+    @Test
+    void throwException_when_not_found_waiting_status_token_ids() {
+        WaitingQueueTokenCommand.Update command = new WaitingQueueTokenCommand.Update(null,
+                                                                                      TokenStatus.ACTIVATE,
+                                                                                      LocalDateTime.now(),
+                                                                                      LocalDateTime.now().plusMinutes(5));
+        assertThatThrownBy(() -> tokenService.updateToken(command))
+                .isInstanceOfSatisfying(WaitingQueueTokenException.class, ex -> {
+                    assertThat(ex.getErrorCode()).isEqualTo(WaitingQueueTokenErrorCode.EMPTY_TOKEN_IDS);
+                });
+    }
+
+    @DisplayName("대기 상태인 토큰들을 활성화 시킬 때 잘못된 만료예정시간이 들어갈 경우 예외가 발생한다.")
+    @Test
+    void throwException_when_invalid_expires_date() {
+        WaitingQueueTokenCommand.Update command = new WaitingQueueTokenCommand.Update(List.of(1L, 2L, 3L),
+                                                                                      TokenStatus.ACTIVATE,
+                                                                                      LocalDateTime.now(),
+                                                                                      LocalDateTime.now().minusMinutes(10));
+        assertThatThrownBy(() -> tokenService.updateToken(command))
+                .isInstanceOfSatisfying(WaitingQueueTokenException.class, ex -> {
+                    assertThat(ex.getErrorCode()).isEqualTo(WaitingQueueTokenErrorCode.INVALID_TOKEN_EXPIRES_DATE);
+                });
+    }
+
 
 }

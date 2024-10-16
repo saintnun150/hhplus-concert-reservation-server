@@ -4,6 +4,9 @@ import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
 import org.lowell.concert.infra.db.waitingqueue.WaitingQueueTokenEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class WaitingQueueTokenMapper {
 
@@ -18,5 +21,16 @@ public class WaitingQueueTokenMapper {
                                     .updatedAt(entity.getUpdatedAt())
                                     .expiresAt(entity.getExpiresAt())
                                     .build();
+    }
+
+    public List<WaitingQueueTokenInfo> toPojoList(List<WaitingQueueTokenEntity> entities) {
+        if (entities == null) {
+            return null;
+        }
+        List<WaitingQueueTokenInfo> items = new ArrayList<>();
+        for (WaitingQueueTokenEntity entity : entities) {
+            items.add(toPojo(entity));
+        }
+        return items;
     }
 }
