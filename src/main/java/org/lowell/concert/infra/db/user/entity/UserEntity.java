@@ -1,4 +1,4 @@
-package org.lowell.concert.infra.db.user;
+package org.lowell.concert.infra.db.user.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
