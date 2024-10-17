@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Repository
 @RequiredArgsConstructor
-public class UserAccountHistoryJpaRepositoryImpl implements UserAccountHistoryRepository {
+public class UserAccountHistoryRepositoryImpl implements UserAccountHistoryRepository {
     private final UserAccountHistoryJpaRepository jpaRepository;
 
 

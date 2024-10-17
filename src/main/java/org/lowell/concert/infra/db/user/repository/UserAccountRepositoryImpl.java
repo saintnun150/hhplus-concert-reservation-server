@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @RequiredArgsConstructor
-public class UserAccountJpaRepositoryImpl implements UserAccountRepository {
+public class UserAccountRepositoryImpl implements UserAccountRepository {
     private final UserAccountJpaRepository jpaRepository;
     private final UserAccountMapper mapper;
 
