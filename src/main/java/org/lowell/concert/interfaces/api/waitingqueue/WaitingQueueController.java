@@ -1,7 +1,7 @@
 package org.lowell.concert.interfaces.api.waitingqueue;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.lowell.concert.domain.waitingqueue.WaitingQueueStatus;
+import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.interfaces.api.common.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +17,7 @@ public class WaitingQueueController implements WaitingQueueApiDocs {
                 WaitingQueueResponse.CreatedQueueInfo.builder()
                                                      .tokenId(5L)
                                                      .token("uuid-token1")
-                                                     .waitingQueueStatus(WaitingQueueStatus.WAITING.name())
+                                                     .waitingQueueStatus(TokenStatus.WAITING.name())
                                                      .build();
         return ApiResponse.createOk(token);
     }
@@ -28,7 +28,7 @@ public class WaitingQueueController implements WaitingQueueApiDocs {
         WaitingQueueResponse.CurrentQueueInfo info = WaitingQueueResponse.CurrentQueueInfo.builder()
                                                                                            .tokenId(20L)
                                                                                            .remainQueueCount(1)
-                                                                                           .waitingQueueStatus(WaitingQueueStatus.WAITING.name())
+                                                                                           .waitingQueueStatus(TokenStatus.WAITING.name())
                                                                                            .expiredDate(LocalDateTime.now().plusMinutes(5))
                                                                                            .build();
         return ApiResponse.createOk(info);
