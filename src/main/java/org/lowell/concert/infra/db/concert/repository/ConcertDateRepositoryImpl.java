@@ -46,19 +46,19 @@ public class ConcertDateRepositoryImpl implements ConcertDateRepository {
 
     @Override
     public List<ConcertDateInfo> getConcertDates(long concertId) {
-        List<ConcertDateEntity> entities = jpaRepository.findAllByConcertIdAndDeletedAtIsNull();
+        List<ConcertDateEntity> entities = jpaRepository.findAllByConcertIdAndDeletedAtIsNull(concertId);
         return mapper.toPojoList(entities);
     }
 
     @Override
     public List<ConcertDateInfo> getConcertDates(LocalDateTime concertDate) {
-        List<ConcertDateEntity> entities = jpaRepository.findAllByConcertDateAndDeletedAtIsNull();
+        List<ConcertDateEntity> entities = jpaRepository.findAllByConcertDateAndDeletedAtIsNull(concertDate);
         return mapper.toPojoList(entities);
     }
 
     @Override
     public List<ConcertDateInfo> getConcertDates(long concertId, LocalDateTime concertDate) {
-        List<ConcertDateEntity> entities = jpaRepository.findAllByConcertIdAndConcertDateAndDeletedAtIsNull();
+        List<ConcertDateEntity> entities = jpaRepository.findAllByConcertIdAndConcertDateAndDeletedAtIsNull(concertId, concertDate);
         return mapper.toPojoList(entities);
     }
 }

@@ -18,7 +18,7 @@ public class ConcertEntity {
     @Column(name = "concert_id")
     private Long concertId;
 
-    @Column(name = "concert_id")
+    @Column(name = "name")
     private String name;
 
     @Column(name = "created_at")

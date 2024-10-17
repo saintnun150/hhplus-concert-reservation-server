@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ConcertSeatJpaRepository extends JpaRepository<ConcertSeatEntity, Long> {
-    ConcertSeatEntity findByConcertDateIdAndSeatNo();
-
+    ConcertSeatEntity findByConcertDateIdAndSeatNo(Long concertDateId, int seatNo);
     List<ConcertSeatEntity> findAllByConcertDateId(Long concertDateId);
 }

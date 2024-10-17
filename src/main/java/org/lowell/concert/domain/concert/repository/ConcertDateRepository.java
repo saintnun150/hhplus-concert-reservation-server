@@ -13,5 +13,4 @@ public interface ConcertDateRepository {
     List<ConcertDateInfo> getConcertDates(long concertId);
     List<ConcertDateInfo> getConcertDates(LocalDateTime concertDate);
     List<ConcertDateInfo> getConcertDates(long concertId, LocalDateTime concertDate);
-
 }

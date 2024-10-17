@@ -18,7 +18,8 @@ public class ConcertSeatRepositoryImpl implements ConcertSeatRepository {
 
     @Override
     public ConcertSeatInfo getConcertSeat(ConcertSeatQuery.Search query) {
-        ConcertSeatEntity entity = jpaRepository.findByConcertDateIdAndSeatNo();
+        ConcertSeatEntity entity = jpaRepository.findByConcertDateIdAndSeatNo(query.concertDateId(),
+                                                                              query.seatNo());
         return mapper.toPojo(entity);
     }
 
