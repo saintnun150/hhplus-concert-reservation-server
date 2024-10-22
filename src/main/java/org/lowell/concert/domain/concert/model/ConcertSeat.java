@@ -71,12 +71,12 @@ public class ConcertSeat {
         isTemporaryReserved(now, tempReservedMinutes);
     }
 
-    public void reserveSeatTemporarily() {
+    public void reserveSeatTemporarily(LocalDateTime time) {
         this.status = SeatStatus.OCCUPIED;
-        this.tempReservedAt = LocalDateTime.now();
+        this.tempReservedAt = time;
     }
 
-    public void reserveSeat() {
-        this.reservedAt = LocalDateTime.now();
+    public void reserveSeat(LocalDateTime time) {
+        this.reservedAt = time;
     }
 }

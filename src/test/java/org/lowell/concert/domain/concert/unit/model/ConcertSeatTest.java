@@ -77,7 +77,7 @@ class ConcertSeatTest {
                                       .build();
 
         concertSeat.checkAvailableSeat(now, tempReservedMinutes);
-        concertSeat.reserveSeatTemporarily();
+        concertSeat.reserveSeatTemporarily(now);
 
         assertThat(concertSeat.getTempReservedAt()).isNotNull();
         assertThat(concertSeat.getStatus()).isEqualTo(SeatStatus.OCCUPIED);
@@ -98,7 +98,7 @@ class ConcertSeatTest {
                                       .tempReservedAt(null)
                                       .reservedAt(null)
                                       .build();
-        concertSeat.reserveSeat();
+        concertSeat.reserveSeat(LocalDateTime.now());
         assertThat(concertSeat.getReservedAt()).isNotNull();
     }
   
