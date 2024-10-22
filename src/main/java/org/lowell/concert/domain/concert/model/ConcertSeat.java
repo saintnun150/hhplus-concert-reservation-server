@@ -60,15 +60,21 @@ public class ConcertSeat {
         }
     }
 
-    public void isTemporaryReserved(LocalDateTime now, int tempReservedMinutes) {
+    public void isTemporaryReservedExpired(LocalDateTime now, int tempReservedMinutes) {
         if (tempReservedAt != null && tempReservedAt.plusMinutes(tempReservedMinutes).isBefore(now)) {
+            throw new DomainException(ConcertSeatErrorCode.RESERVED_EXPIRED);
+        }
+    }
+
+    public void isTemporaryReserved(LocalDateTime now, int tempReservedMinutes) {
+        if (tempReservedAt != null && tempReservedAt.plusMinutes(tempReservedMinutes).isAfter(now)) {
             throw new DomainException(ConcertSeatErrorCode.RESERVED_TEMPORARY);
         }
     }
 
     public void checkAvailableSeat(LocalDateTime now, int tempReservedMinutes) {
         isCompletedReserved();
-        isTemporaryReserved(now, tempReservedMinutes);
+        isTemporaryReservedExpired(now, tempReservedMinutes);
     }
 
     public void reserveSeatTemporarily(LocalDateTime time) {

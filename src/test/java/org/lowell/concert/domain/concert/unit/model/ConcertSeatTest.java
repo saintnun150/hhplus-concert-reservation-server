@@ -55,7 +55,7 @@ class ConcertSeatTest {
 
         assertThatThrownBy(() -> concertSeat.checkAvailableSeat(now, tempReservedMinutes))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertSeatErrorCode.RESERVED_TEMPORARY);
+                    assertThat(ex.getErrorCode()).isEqualTo(ConcertSeatErrorCode.RESERVED_EXPIRED);
                 });
     }
 

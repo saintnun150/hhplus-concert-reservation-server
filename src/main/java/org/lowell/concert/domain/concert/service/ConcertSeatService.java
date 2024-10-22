@@ -2,11 +2,13 @@ package org.lowell.concert.domain.concert.service;
 
 import lombok.RequiredArgsConstructor;
 import org.lowell.concert.domain.common.exception.DomainException;
+import org.lowell.concert.domain.concert.dto.ConcertSeatCommand;
 import org.lowell.concert.domain.concert.dto.ConcertSeatQuery;
 import org.lowell.concert.domain.concert.exception.ConcertSeatErrorCode;
 import org.lowell.concert.domain.concert.model.ConcertSeat;
 import org.lowell.concert.domain.concert.repository.ConcertSeatRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -15,6 +17,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ConcertSeatService {
     private final ConcertSeatRepository concertSeatRepository;
+
+    @Transactional
+    public void createConcertSeat(ConcertSeatCommand.Create command) {
+        concertSeatRepository.createConcertSeat(command);
+    }
 
     public ConcertSeat getConcertSeat(ConcertSeatQuery.Search query) {
         return concertSeatRepository.getConcertSeat(query)
@@ -43,6 +50,10 @@ public class ConcertSeatService {
             throw new DomainException(ConcertSeatErrorCode.NOT_FOUND_AVAILABLE_SEAT);
         }
         return concertSeats;
+    }
+
+    public void deleteAll() {
+        concertSeatRepository.deleteAll();
     }
 
 

@@ -36,4 +36,8 @@ public class ConcertReservationService {
         return reservations;
     }
 
+    public void deleteAll() {
+        concertReservationRepository.deleteAll();
+    }
+
 }

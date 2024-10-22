@@ -1,5 +1,6 @@
 package org.lowell.concert.domain.concert.repository;
 
+import org.lowell.concert.domain.concert.dto.ConcertSeatCommand;
 import org.lowell.concert.domain.concert.dto.ConcertSeatQuery;
 import org.lowell.concert.domain.concert.model.Concert;
 import org.lowell.concert.domain.concert.model.ConcertSeat;
@@ -12,4 +13,6 @@ public interface ConcertSeatRepository {
     Optional<ConcertSeat> getConcertSeatWithLock(ConcertSeatQuery.Search query);
     List<ConcertSeat> getConcertSeats(ConcertSeatQuery.SearchList query);
     void saveAll(List<ConcertSeat> concertSeats);
+    void deleteAll();
+    void createConcertSeat(ConcertSeatCommand.Create command);
 }

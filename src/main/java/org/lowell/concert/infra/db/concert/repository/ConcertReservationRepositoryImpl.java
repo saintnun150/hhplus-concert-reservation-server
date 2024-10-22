@@ -37,4 +37,9 @@ public class ConcertReservationRepositoryImpl implements ConcertReservationRepos
     public List<ConcertReservation> getConcertReservations(ConcertReservationQuery.SearchList query) {
         return jpaRepository.findAllByUserId(query.userId());
     }
+
+    @Override
+    public void deleteAll() {
+        jpaRepository.deleteAll();
+    }
 }

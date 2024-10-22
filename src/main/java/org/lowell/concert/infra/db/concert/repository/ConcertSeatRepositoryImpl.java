@@ -1,10 +1,12 @@
 package org.lowell.concert.infra.db.concert.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.lowell.concert.domain.concert.dto.ConcertSeatCommand;
 import org.lowell.concert.domain.concert.dto.ConcertSeatQuery;
 import org.lowell.concert.domain.concert.model.ConcertSeat;
 import org.lowell.concert.domain.concert.repository.ConcertSeatRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +15,18 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ConcertSeatRepositoryImpl implements ConcertSeatRepository {
     private final ConcertSeatJpaRepository jpaRepository;
+
+    @Override
+    public void createConcertSeat(ConcertSeatCommand.Create command) {
+        ConcertSeat entity = ConcertSeat.builder()
+                                        .concertScheduleId(command.scheduleId())
+                                        .seatNo(command.seatNo())
+                                        .status(command.status())
+                                        .price(command.price())
+                                        .build();
+        jpaRepository.save(entity);
+
+    }
 
     @Override
     public Optional<ConcertSeat> getConcertSeat(ConcertSeatQuery.Search query) {
@@ -34,4 +48,12 @@ public class ConcertSeatRepositoryImpl implements ConcertSeatRepository {
     public void saveAll(List<ConcertSeat> concertSeats) {
         jpaRepository.saveAll(concertSeats);
     }
+
+    @Transactional
+    @Override
+    public void deleteAll() {
+        jpaRepository.deleteAll();
+    }
+
+
 }
