@@ -1,44 +1,49 @@
 package org.lowell.concert.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.user.dto.UserAccountCommand;
 import org.lowell.concert.domain.user.exception.UserAccountErrorCode;
-import org.lowell.concert.domain.user.exception.UserException;
-import org.lowell.concert.domain.user.model.TransactionType;
-import org.lowell.concert.domain.user.model.UserAccountInfo;
-import org.lowell.concert.domain.user.repository.UserAccountHistoryRepository;
+import org.lowell.concert.domain.user.model.UserAccount;
 import org.lowell.concert.domain.user.repository.UserAccountRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class UserAccountService {
     private final UserAccountRepository userAccountRepository;
-    private final UserAccountHistoryRepository historyRepository;
 
-    public UserAccountInfo getUserAccount(Long accountId) {
-        return userAccountRepository.getUserAccount(accountId);
+    public void createUserAccount(Long userId) {
+        userAccountRepository.createUserAccount(userId);
     }
-    public UserAccountInfo getUserAccountByUserId(Long userId) {
-        return userAccountRepository.getUserAccountByUserId(userId);
+
+    public void deleteAll() {
+        userAccountRepository.deleteAll();
     }
-    public void changeAccountBalance(UserAccountCommand.Action command) {
-        if (command.amount() <= 0) {
-            throw new UserException(UserAccountErrorCode.INVALID_AMOUNT);
-        }
-        UserAccountInfo userAccount = getUserAccount(command.accountId());
-        if (userAccount == null) {
-            throw new UserException(UserAccountErrorCode.NOT_FOUND_ACCOUNT);
-        }
-        if (command.transactionType() == TransactionType.USE) {
-            if (userAccount.getBalance() < command.amount()) {
-                throw new UserException(UserAccountErrorCode.EXCEED_BALANCE);
-            }
-        }
-        userAccount.changeBalance(command.transactionType(), command.amount());
-        UserAccountCommand.Update update = new UserAccountCommand.Update(command.accountId(),
-                                                                         userAccount.getBalance());
-        userAccountRepository.updateUserAccount(update);
-        historyRepository.insert(command);
+
+    public UserAccount getUserAccount(Long userId) {
+        return userAccountRepository.getUserAccountByUserId(userId)
+                                    .orElseThrow(() -> new DomainException(UserAccountErrorCode.NOT_FOUND_ACCOUNT));
     }
+
+    public UserAccount getUserAccountWithLock(Long userId) {
+        return userAccountRepository.getUserAccountByUserIdWithLock(userId)
+                                    .orElseThrow(() -> new DomainException(UserAccountErrorCode.NOT_FOUND_ACCOUNT));
+    }
+
+    @Transactional
+    public UserAccount chargeBalance(UserAccountCommand.Action action) {
+        UserAccount userAccount = getUserAccountWithLock(action.userId());
+        userAccount.chargeBalance(action.amount());
+        return userAccount;
+    }
+
+    @Transactional
+    public UserAccount useBalance(UserAccountCommand.Action action) {
+        UserAccount userAccount = getUserAccountWithLock(action.userId());
+        userAccount.useBalance(action.amount());
+        return userAccount;
+    }
+
 }

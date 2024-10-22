@@ -1,6 +1,7 @@
-package org.lowell.concert.infra.db.user.entity;
+package org.lowell.concert.domain.user.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,17 +11,16 @@ import java.time.LocalDateTime;
 @Table(name = "t_user")
 @Getter
 @NoArgsConstructor
-public class UserEntity {
+public class User {
 
-    public UserEntity(Long userId, String username, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    @Builder
+    public User(Long userId, String username, LocalDateTime createdAt) {
         this.userId = userId;
         this.username = username;
         this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long userId;
 
@@ -29,7 +29,4 @@ public class UserEntity {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }

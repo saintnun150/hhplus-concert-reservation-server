@@ -1,14 +1,17 @@
-package org.lowell.concert.domain.user.service;
+package org.lowell.concert.domain.user.unit.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.user.exception.UserErrorCode;
-import org.lowell.concert.domain.user.exception.UserException;
 import org.lowell.concert.domain.user.repository.UserRepository;
+import org.lowell.concert.domain.user.service.UserService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,10 +30,10 @@ class UserServiceTest {
     @Test
     void throwException_when_request_with_wrong_userId() {
         Long userId = 0L;
-        when(userRepository.getUserInfo(userId)).thenReturn(null);
+        when(userRepository.getUser(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getUser(userId))
-                .isInstanceOfSatisfying(UserException.class, ex -> {
+                .isInstanceOfSatisfying(DomainException.class, ex -> {
                     assertThat(ex.getErrorCode()).isEqualTo(UserErrorCode.NOT_FOUND_USER);
                 });
     }
