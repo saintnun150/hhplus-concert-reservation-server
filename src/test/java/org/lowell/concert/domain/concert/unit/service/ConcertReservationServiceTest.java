@@ -1,12 +1,13 @@
-package org.lowell.concert.domain.concert.service;
+package org.lowell.concert.domain.concert.unit.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.concert.dto.ConcertReservationQuery;
 import org.lowell.concert.domain.concert.exception.ConcertReservationErrorCode;
-import org.lowell.concert.domain.concert.exception.ConcertReservationException;
 import org.lowell.concert.domain.concert.repository.ConcertReservationRepository;
+import org.lowell.concert.domain.concert.service.ConcertReservationService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,7 +34,7 @@ class ConcertReservationServiceTest {
         when(reservationRepository.getConcertReservation(query)).thenReturn(null);
 
         assertThatThrownBy(() -> reservationService.getConcertReservation(query))
-                .isInstanceOfSatisfying(ConcertReservationException.class, ex -> {
+                .isInstanceOfSatisfying(DomainException.class, ex -> {
                     assertThat(ex.getErrorCode()).isEqualTo(ConcertReservationErrorCode.NOT_FOUND_RESERVATION);
                 });
     }
@@ -46,7 +47,7 @@ class ConcertReservationServiceTest {
         when(reservationRepository.getConcertReservations(query)).thenReturn(null);
 
         assertThatThrownBy(() -> reservationService.getConcertReservations(query))
-                .isInstanceOfSatisfying(ConcertReservationException.class, ex -> {
+                .isInstanceOfSatisfying(DomainException.class, ex -> {
                     assertThat(ex.getErrorCode()).isEqualTo(ConcertReservationErrorCode.NOT_FOUND_RESERVATION);
                 });
     }

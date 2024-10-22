@@ -7,9 +7,9 @@ import org.lowell.concert.domain.common.exception.DomainErrorResponse;
 
 @Getter
 @RequiredArgsConstructor
-public enum ConcertDateErrorCode implements DomainErrorCode {
-    NOT_FOUND_CONCERT_DATE(404, "CONCERT_DATE_ERR_01", "ConcertDate Not Found"),
-    INVALID_CONCERT_DATE(404, "CONCERT_DATE_ERR_02", "ConcertDate cannot be empty"),
+public enum ConcertScheduleErrorCode implements DomainErrorCode {
+    NOT_FOUND_CONCERT_SCHEDULE(404, "CONCERT_DATE_ERR_01", "ConcertDate Not Found"),
+    INVALID_SCHEDULE_DATE(404, "CONCERT_DATE_ERR_02", "ConcertDate cannot be empty"),
     INVALID_CONCERT_ID(404, "CONCERT_DATE_ERR_03", "ConcertId cannot be empty")
     ;
 

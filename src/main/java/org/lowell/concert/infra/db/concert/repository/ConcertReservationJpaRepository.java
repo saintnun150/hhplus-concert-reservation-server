@@ -1,10 +1,10 @@
 package org.lowell.concert.infra.db.concert.repository;
 
-import org.lowell.concert.infra.db.concert.entity.ConcertReservationEntity;
+import org.lowell.concert.domain.concert.model.ConcertReservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface ConcertReservationJpaRepository extends JpaRepository<ConcertReservationEntity, Long> {
-    List<ConcertReservationEntity> findAllByUserId(Long userId);
+public interface ConcertReservationJpaRepository extends JpaRepository<ConcertReservation, Long> {
+    List<ConcertReservation> findAllByUserId(Long userId);
 }

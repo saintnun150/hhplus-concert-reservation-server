@@ -1,4 +1,4 @@
-package org.lowell.concert.infra.db.concert.entity;
+package org.lowell.concert.domain.concert.model;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -11,18 +11,18 @@ import java.time.LocalDateTime;
 @Table(name = "t_concert_date")
 @Getter
 @NoArgsConstructor
-public class ConcertDateEntity {
+public class ConcertSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "concert_date_id")
-    private Long concertDateId;
+    @Column(name = "concert_schedule_id")
+    private Long scheduleId;
 
     @Column(name = "concert_id")
     private Long concertId;
 
-    @Column(name = "concert_date")
-    private LocalDateTime concertDate;
+    @Column(name = "schedule_date")
+    private LocalDateTime scheduleDate;
 
     @Column(name = "begin_time")
     private LocalDateTime beginTime;
@@ -40,10 +40,10 @@ public class ConcertDateEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public ConcertDateEntity(Long concertDateId, Long concertId, LocalDateTime concertDate, LocalDateTime beginTime, LocalDateTime endTime, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
-        this.concertDateId = concertDateId;
+    public ConcertSchedule(Long scheduleId, Long concertId, LocalDateTime scheduleDate, LocalDateTime beginTime, LocalDateTime endTime, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        this.scheduleId = scheduleId;
         this.concertId = concertId;
-        this.concertDate = concertDate;
+        this.scheduleDate = scheduleDate;
         this.beginTime = beginTime;
         this.endTime = endTime;
         this.createdAt = createdAt;

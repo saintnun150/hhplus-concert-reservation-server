@@ -1,41 +1,37 @@
 package org.lowell.concert.infra.db.concert.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.lowell.concert.application.concert.ConcertMapper;
 import org.lowell.concert.domain.concert.dto.ConcertCommand;
-import org.lowell.concert.domain.concert.model.ConcertInfo;
+import org.lowell.concert.domain.concert.model.Concert;
 import org.lowell.concert.domain.concert.repository.ConcertRepository;
-import org.lowell.concert.infra.db.concert.entity.ConcertEntity;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class ConcertRepositoryImpl implements ConcertRepository {
     private final ConcertJpaRepository jpaRepository;
-    private final ConcertMapper mapper;
 
     @Override
     public void createConcert(ConcertCommand.Create command) {
-        ConcertEntity entity = ConcertEntity.builder()
-                                            .name(command.name())
-                                            .createdAt(LocalDateTime.now())
-                                            .build();
+        Concert entity = Concert.builder()
+                                .name(command.name())
+                                .createdAt(LocalDateTime.now())
+                                .build();
         jpaRepository.save(entity);
     }
 
     @Override
-    public ConcertInfo getConcert(long concertId) {
-        ConcertEntity entity = jpaRepository.findById(concertId)
-                                            .orElse(null);
-        return mapper.toPojo(entity);
+    public Optional<Concert> getConcert(long concertId) {
+        return jpaRepository.findById(concertId);
     }
 
+
     @Override
-    public List<ConcertInfo> getConcerts() {
-        List<ConcertEntity> entities = jpaRepository.findAllByDeletedAtIsNull();
-        return mapper.toPojoList(entities);
+    public List<Concert> getConcerts() {
+        return jpaRepository.findAllByDeletedAtIsNull();
     }
 }

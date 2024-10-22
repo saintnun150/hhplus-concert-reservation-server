@@ -1,4 +1,4 @@
-package org.lowell.concert.infra.db.concert.entity;
+package org.lowell.concert.domain.concert.model;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "t_concert")
 @Getter
 @NoArgsConstructor
-public class ConcertEntity {
+public class Concert {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +31,7 @@ public class ConcertEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public ConcertEntity(Long concertId, String name, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+    public Concert(Long concertId, String name, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
         this.concertId = concertId;
         this.name = name;
         this.createdAt = createdAt;

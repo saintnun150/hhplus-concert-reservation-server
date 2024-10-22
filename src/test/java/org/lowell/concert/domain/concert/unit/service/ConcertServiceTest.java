@@ -1,12 +1,13 @@
-package org.lowell.concert.domain.concert.service;
+package org.lowell.concert.domain.concert.unit.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.concert.dto.ConcertCommand;
 import org.lowell.concert.domain.concert.exception.ConcertErrorCode;
-import org.lowell.concert.domain.concert.exception.ConcertException;
 import org.lowell.concert.domain.concert.repository.ConcertRepository;
+import org.lowell.concert.domain.concert.service.ConcertService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,7 +31,7 @@ class ConcertServiceTest {
         String concertName = "";
         ConcertCommand.Create command = new ConcertCommand.Create(concertName);
         assertThatThrownBy(() -> concertService.createConcert(command))
-                .isInstanceOfSatisfying(ConcertException.class, ex -> {
+                .isInstanceOfSatisfying(DomainException.class, ex -> {
                     assertThat(ex.getErrorCode()).isEqualTo(ConcertErrorCode.INVALID_CONCERT_NAME);
                 });
     }
@@ -41,7 +42,7 @@ class ConcertServiceTest {
         long concertId = 1L;
         when(concertRepository.getConcert(concertId)).thenReturn(null);
         assertThatThrownBy(() -> concertService.getConcert(concertId))
-                .isInstanceOfSatisfying(ConcertException.class, ex -> {
+                .isInstanceOfSatisfying(DomainException.class, ex -> {
                     assertThat(ex.getErrorCode()).isEqualTo(ConcertErrorCode.NOT_FOUND_CONCERT);
                 });
     }
@@ -51,7 +52,7 @@ class ConcertServiceTest {
     void throwException_when_search_concert() {
         when(concertRepository.getConcerts()).thenReturn(null);
         assertThatThrownBy(() -> concertService.getConcerts())
-                .isInstanceOfSatisfying(ConcertException.class, ex -> {
+                .isInstanceOfSatisfying(DomainException.class, ex -> {
                     assertThat(ex.getErrorCode()).isEqualTo(ConcertErrorCode.NOT_FOUND_CONCERT);
                 });
     }
