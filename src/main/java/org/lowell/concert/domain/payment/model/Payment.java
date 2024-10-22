@@ -1,11 +1,10 @@
-package org.lowell.concert.infra.db.payment.entity;
+package org.lowell.concert.domain.payment.model;
 
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.lowell.concert.domain.payment.model.PaymentStatus;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 @Table(name = "t_payment")
 @Getter
 @NoArgsConstructor
-public class PaymentEntity {
+public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,11 +36,16 @@ public class PaymentEntity {
     private LocalDateTime updatedAt;
 
     @Builder
-    public PaymentEntity(Long paymentId, Long reservationId, Long payAmount, PaymentStatus status, LocalDateTime createdAt) {
+    public Payment(Long paymentId, Long reservationId, Long payAmount, PaymentStatus status, LocalDateTime createdAt) {
         this.paymentId = paymentId;
         this.reservationId = reservationId;
         this.payAmount = payAmount;
         this.status = status;
         this.createdAt = createdAt;
+    }
+
+    public void updateStatus(PaymentStatus status) {
+        this.status = status;
+        this.updatedAt = LocalDateTime.now();
     }
 }

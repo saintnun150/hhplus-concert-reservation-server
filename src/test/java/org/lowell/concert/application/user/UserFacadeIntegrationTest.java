@@ -1,5 +1,6 @@
 package org.lowell.concert.application.user;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,8 +26,8 @@ public class UserFacadeIntegrationTest {
     @Autowired
     private UserFacade userFacade;
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void tearDown() {
         userService.deleteAllUser();
         userAccountService.deleteAll();
     }
