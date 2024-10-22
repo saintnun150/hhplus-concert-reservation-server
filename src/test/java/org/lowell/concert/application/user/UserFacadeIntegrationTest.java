@@ -1,10 +1,8 @@
-package org.lowell.concert.domain.user.integration;
+package org.lowell.concert.application.user;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.lowell.concert.application.user.UserFacade;
-import org.lowell.concert.application.user.UserInfo;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.user.exception.UserAccountErrorCode;
 import org.lowell.concert.domain.user.service.UserAccountService;
