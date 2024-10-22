@@ -2,10 +2,10 @@ package org.lowell.concert.domain.waitingqueue.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.EnumUtils;
+import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueErrorCode;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueException;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
@@ -29,18 +29,18 @@ public class WaitingQueueService {
 
     public WaitingQueue getWaitingQueue(WaitingQueueQuery.GetQueue query) {
         WaitingQueue queue = queueRepository.getWaitingQueue(query)
-                                            .orElseThrow(() -> WaitingQueueException.create(WaitingQueueErrorCode.NOT_FOUND_TOKEN));
+                                            .orElseThrow(() -> DomainException.create(WaitingQueueErrorCode.NOT_FOUND_TOKEN));
         return queue;
     }
 
     public Long getWaitingQueueOrder(WaitingQueueQuery.GetQueue query) {
         WaitingQueue queue = queueRepository.getWaitingQueue(query)
-                                            .orElseThrow(() -> WaitingQueueException.create(WaitingQueueErrorCode.NOT_FOUND_TOKEN));
+                                            .orElseThrow(() -> DomainException.create(WaitingQueueErrorCode.NOT_FOUND_TOKEN));
         queue.validateWaitingStatus();
 
         Long waitingOrder = queueRepository.getWaitingOrder(new WaitingQueueQuery.Order(queue.getTokenId(), TokenStatus.WAITING));
         if (waitingOrder == null) {
-            throw WaitingQueueException.create(WaitingQueueErrorCode.INVALID_WAITING_ORDER);
+            throw DomainException.create(WaitingQueueErrorCode.INVALID_WAITING_ORDER);
         }
         return waitingOrder;
     }
@@ -59,23 +59,23 @@ public class WaitingQueueService {
 
     public void updateWaitingQueue(WaitingQueueCommand.Update command) {
         if (command.tokenId() == null) {
-            throw new WaitingQueueException(WaitingQueueErrorCode.EMPTY_TOKEN_ID);
+            throw new DomainException(WaitingQueueErrorCode.EMPTY_TOKEN_ID);
         }
         if (command.status() == null || !EnumUtils.isValidEnum(TokenStatus.class, command.status().name())) {
-            throw new WaitingQueueException(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT);
+            throw new DomainException(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT);
         }
         queueRepository.update(command);
     }
 
      public void updateWaitingQueues(WaitingQueueCommand.UpdateBatch command) {
          if (CollectionUtils.isEmpty(command.tokenIds())) {
-             throw new WaitingQueueException(WaitingQueueErrorCode.EMPTY_TOKEN_IDS);
+             throw new DomainException(WaitingQueueErrorCode.EMPTY_TOKEN_IDS);
          }
          if (command.status() == null || !EnumUtils.isValidEnum(TokenStatus.class, command.status().name())) {
-             throw new WaitingQueueException(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT);
+             throw new DomainException(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT);
          }
          if (command.expiresAt() == null || command.expiresAt().isBefore(LocalDateTime.now())) {
-             throw new WaitingQueueException(WaitingQueueErrorCode.INVALID_TOKEN_EXPIRES_DATE);
+             throw new DomainException(WaitingQueueErrorCode.INVALID_TOKEN_EXPIRES_DATE);
          }
          queueRepository.updateAll(command);
      }

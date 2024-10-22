@@ -2,15 +2,15 @@ package org.lowell.concert.domain.waitingqueue.unit.model;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueErrorCode;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueException;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class WaitingQueueTest {
 
@@ -25,7 +25,7 @@ class WaitingQueueTest {
                                              .updatedAt(null)
                                              .expiresAt(null)
                                              .build())
-                .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                .isInstanceOfSatisfying(DomainException.class, e -> {
                     assertEquals(WaitingQueueErrorCode.INVALID_TOKEN_INPUT, e.getErrorCode());
                 });
     }
@@ -41,7 +41,7 @@ class WaitingQueueTest {
                                              .updatedAt(null)
                                              .expiresAt(null)
                                              .build())
-                .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                .isInstanceOfSatisfying(DomainException.class, e -> {
                     assertEquals(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT, e.getErrorCode());
                 });
     }
@@ -59,7 +59,7 @@ class WaitingQueueTest {
                                          .build();
 
         assertThatThrownBy(queue::validateWaitingStatus)
-                .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                .isInstanceOfSatisfying(DomainException.class, e -> {
                     assertEquals(WaitingQueueErrorCode.NOT_WAITING_STATUS, e.getErrorCode());
                 });
     }
@@ -77,7 +77,7 @@ class WaitingQueueTest {
                                          .build();
 
         assertThatThrownBy(queue::validateActivateStatus)
-                .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                .isInstanceOfSatisfying(DomainException.class, e -> {
                     assertEquals(WaitingQueueErrorCode.NOT_ACTIVATE_STATUS, e.getErrorCode());
                 });
     }
@@ -95,7 +95,7 @@ class WaitingQueueTest {
                                          .build();
 
         assertThatThrownBy(() -> queue.validateTokenExpiredDate(10))
-                .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                .isInstanceOfSatisfying(DomainException.class, e -> {
                     assertEquals(WaitingQueueErrorCode.TOKEN_EXPIRED, e.getErrorCode());
                 });
     }

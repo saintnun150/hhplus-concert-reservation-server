@@ -4,10 +4,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueErrorCode;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueException;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
@@ -65,10 +65,10 @@ class WaitingQueueServiceTest {
         WaitingQueueQuery.GetQueue query = new WaitingQueueQuery.GetQueue(token);
 
         when(waitingQueueRepository.getWaitingQueue(query))
-                .thenThrow(WaitingQueueException.create(WaitingQueueErrorCode.NOT_FOUND_TOKEN));
+                .thenThrow(DomainException.create(WaitingQueueErrorCode.NOT_FOUND_TOKEN));
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.getWaitingQueue(query))
-                  .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                  .isInstanceOfSatisfying(DomainException.class, e -> {
                       assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.NOT_FOUND_TOKEN);
                   });
     }
@@ -92,7 +92,7 @@ class WaitingQueueServiceTest {
 
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.getWaitingQueueOrder(query))
-                  .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                  .isInstanceOfSatisfying(DomainException.class, e -> {
                       assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.NOT_WAITING_STATUS);
                   });
     }
@@ -119,7 +119,7 @@ class WaitingQueueServiceTest {
 
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.getWaitingQueueOrder(query))
-                  .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                  .isInstanceOfSatisfying(DomainException.class, e -> {
                       assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.INVALID_WAITING_ORDER);
                   });
     }
@@ -165,7 +165,7 @@ class WaitingQueueServiceTest {
         WaitingQueueCommand.Update update = new WaitingQueueCommand.Update(null, TokenStatus.EXPIRED, LocalDateTime.now());
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.updateWaitingQueue(update))
-                  .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                  .isInstanceOfSatisfying(DomainException.class, e -> {
                       assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.EMPTY_TOKEN_ID);
                   });
     }
@@ -177,7 +177,7 @@ class WaitingQueueServiceTest {
         WaitingQueueCommand.Update update = new WaitingQueueCommand.Update(1L, null, LocalDateTime.now());
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.updateWaitingQueue(update))
-                  .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                  .isInstanceOfSatisfying(DomainException.class, e -> {
                       assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT);
                   });
     }
@@ -192,7 +192,7 @@ class WaitingQueueServiceTest {
                                                                                      LocalDateTime.now().plusDays(1));
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.updateWaitingQueues(update))
-                  .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                  .isInstanceOfSatisfying(DomainException.class, e -> {
                       assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.EMPTY_TOKEN_IDS);
                   });
     }
@@ -207,7 +207,7 @@ class WaitingQueueServiceTest {
                                                                                      LocalDateTime.now().minusDays(1));
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.updateWaitingQueues(update))
-                  .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                  .isInstanceOfSatisfying(DomainException.class, e -> {
                       assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.INVALID_TOKEN_EXPIRES_DATE);
                   });
     }

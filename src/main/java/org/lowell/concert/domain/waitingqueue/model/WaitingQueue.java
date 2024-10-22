@@ -5,8 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.EnumUtils;
+import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueErrorCode;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueException;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -39,10 +39,10 @@ public class WaitingQueue {
     @Builder
     public WaitingQueue(Long tokenId, String token, TokenStatus tokenStatus, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime expiresAt) {
         if (!StringUtils.hasText(token)) {
-            throw WaitingQueueException.create(WaitingQueueErrorCode.INVALID_TOKEN_INPUT);
+            throw DomainException.create(WaitingQueueErrorCode.INVALID_TOKEN_INPUT);
         }
         if (tokenStatus == null || !EnumUtils.isValidEnum(TokenStatus.class, tokenStatus.name())) {
-            throw WaitingQueueException.create(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT);
+            throw DomainException.create(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT);
         }
 
         this.tokenId = tokenId;
@@ -58,13 +58,13 @@ public class WaitingQueue {
 
     public void validateWaitingStatus() {
         if (tokenStatus != TokenStatus.WAITING) {
-            throw WaitingQueueException.create(WaitingQueueErrorCode.NOT_WAITING_STATUS);
+            throw DomainException.create(WaitingQueueErrorCode.NOT_WAITING_STATUS);
         }
     }
 
     public void validateActivateStatus() {
         if (tokenStatus != TokenStatus.ACTIVATE) {
-            throw WaitingQueueException.create(WaitingQueueErrorCode.NOT_ACTIVATE_STATUS);
+            throw DomainException.create(WaitingQueueErrorCode.NOT_ACTIVATE_STATUS);
         }
 
     }
@@ -72,7 +72,7 @@ public class WaitingQueue {
     public void validateTokenExpiredDate(long timeToLive) {
         validateActivateStatus();
         if (expiresAt == null || LocalDateTime.now().isAfter(expiresAt.plusMinutes(timeToLive))) {
-            throw WaitingQueueException.create(WaitingQueueErrorCode.TOKEN_EXPIRED);
+            throw DomainException.create(WaitingQueueErrorCode.TOKEN_EXPIRED);
         }
     }
 

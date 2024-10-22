@@ -2,10 +2,10 @@ package org.lowell.concert.domain.waitingqueue.integration;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueErrorCode;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueException;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
 import org.lowell.concert.domain.waitingqueue.service.WaitingQueueService;
@@ -65,7 +65,7 @@ public class WaitingQueueIntegrationTest {
         WaitingQueueQuery.GetQueue query = new WaitingQueueQuery.GetQueue(token2);
         // then
         assertThatThrownBy(() -> waitingQueueService.getWaitingQueue(query))
-                .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                .isInstanceOfSatisfying(DomainException.class, e -> {
                     assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.NOT_FOUND_TOKEN);
                 });
     }
@@ -81,7 +81,7 @@ public class WaitingQueueIntegrationTest {
         WaitingQueueQuery.GetQueue query = new WaitingQueueQuery.GetQueue(token);
         // then
         assertThatThrownBy(() -> waitingQueueService.getWaitingQueueOrder(query))
-                .isInstanceOfSatisfying(WaitingQueueException.class, e -> {
+                .isInstanceOfSatisfying(DomainException.class, e -> {
                     assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.NOT_WAITING_STATUS);
                 });
     }

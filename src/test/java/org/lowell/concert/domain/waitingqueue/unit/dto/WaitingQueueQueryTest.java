@@ -2,10 +2,10 @@ package org.lowell.concert.domain.waitingqueue.unit.dto;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WaitingQueueQueryTest {
 
@@ -16,7 +16,7 @@ class WaitingQueueQueryTest {
         String token = "";
 
         // then
-        assertThrows(WaitingQueueException.class, () -> {
+        assertThrows(DomainException.class, () -> {
             new WaitingQueueQuery.GetQueue(token);
         });
     }
