@@ -8,6 +8,7 @@ import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +25,7 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
                                           .token(command.token())
                                           .tokenStatus(command.status())
                                           .createdAt(LocalDateTime.now())
+                                          .expiresAt(command.expiresAt())
                                           .build();
 
         jpaRepository.save(entity);
@@ -64,6 +66,12 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
                                                                      command.status(),
                                                                      command.updatedAt(),
                                                                      command.expiresAt());
+    }
+
+    @Transactional
+    @Override
+    public void deleteAll() {
+        jpaRepository.deleteAll();
     }
 
 }

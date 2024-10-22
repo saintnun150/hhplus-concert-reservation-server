@@ -76,4 +76,17 @@ public class WaitingQueue {
         }
     }
 
+    public void activateToken(LocalDateTime now, long timeToLive) {
+        validateWaitingStatus();
+        tokenStatus = TokenStatus.ACTIVATE;
+        this.updatedAt = now;
+        this.expiresAt = now.plusMinutes(timeToLive);
+    }
+
+    public void expiredToken(LocalDateTime now) {
+        validateActivateStatus();
+        tokenStatus = TokenStatus.EXPIRED;
+        this.updatedAt = now;
+    }
+
 }

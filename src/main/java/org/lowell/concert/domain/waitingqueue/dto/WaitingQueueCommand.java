@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class WaitingQueueCommand {
-    public record Create(String token, TokenStatus status) {
+    public record Create(String token, TokenStatus status, LocalDateTime expiresAt) {
     }
     public record Update(Long tokenId, TokenStatus status, LocalDateTime updatedAt) {
     }

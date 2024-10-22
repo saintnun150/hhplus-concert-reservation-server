@@ -47,7 +47,7 @@ public class WaitingQueueService {
 
     public boolean createActivationQueueImmediately() {
         Long activateQueueCount = queueRepository.getActivateQueueCount(TokenStatus.ACTIVATE);
-        if (activateQueueCount == null) {
+        if (activateQueueCount == null || activateQueueCount == 0) {
             return true;
         }
         return activateQueueCount < ACTIVATE_CAPACITY;
@@ -57,27 +57,25 @@ public class WaitingQueueService {
         return queueRepository.getWaitingQueues(query);
     }
 
-    public void updateWaitingQueue(WaitingQueueCommand.Update command) {
-        if (command.tokenId() == null) {
-            throw new DomainException(WaitingQueueErrorCode.EMPTY_TOKEN_ID);
+    public int getActivatableQueueCount() {
+        Long activateQueueCount = queueRepository.getActivateQueueCount(TokenStatus.ACTIVATE);
+        if (activateQueueCount == null || activateQueueCount == 0) {
+            return ACTIVATE_CAPACITY;
         }
-        if (command.status() == null || !EnumUtils.isValidEnum(TokenStatus.class, command.status().name())) {
-            throw new DomainException(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT);
-        }
-        queueRepository.update(command);
+        return ACTIVATE_CAPACITY - activateQueueCount.intValue();
     }
 
-     public void updateWaitingQueues(WaitingQueueCommand.UpdateBatch command) {
-         if (CollectionUtils.isEmpty(command.tokenIds())) {
-             throw new DomainException(WaitingQueueErrorCode.EMPTY_TOKEN_IDS);
-         }
-         if (command.status() == null || !EnumUtils.isValidEnum(TokenStatus.class, command.status().name())) {
-             throw new DomainException(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT);
-         }
-         if (command.expiresAt() == null || command.expiresAt().isBefore(LocalDateTime.now())) {
-             throw new DomainException(WaitingQueueErrorCode.INVALID_TOKEN_EXPIRES_DATE);
-         }
-         queueRepository.updateAll(command);
-     }
+    public void updateWaitingQueues(WaitingQueueCommand.UpdateBatch command) {
+        int activatableQueueCount = getActivatableQueueCount();
+        List<WaitingQueue> waitingQueues = getWaitingQueueByStatus(new WaitingQueueQuery.GetQueues(TokenStatus.WAITING, activatableQueueCount));
+        List<Long> tokenIds = waitingQueues.stream()
+                                           .map(WaitingQueue::getTokenId)
+                                           .toList();
+        command = new WaitingQueueCommand.UpdateBatch(tokenIds, TokenStatus.ACTIVATE, command.updatedAt(), command.expiresAt());
+        queueRepository.updateAll(command);
+    }
 
+    public void deleteAll() {
+        queueRepository.deleteAll();
+    }
 }

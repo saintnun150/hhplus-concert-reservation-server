@@ -1,5 +1,6 @@
 package org.lowell.concert.domain.waitingqueue.integration;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.domain.common.exception.DomainException;
@@ -28,12 +29,17 @@ public class WaitingQueueIntegrationTest {
     @Autowired
     private WaitingQueueService waitingQueueService;
 
+    @BeforeEach
+    void setUp() {
+        waitingQueueService.deleteAll();
+    }
+
     @DisplayName("대기열 생성 테스트")
     @Test
     void createWaitingQueue() {
         // given
         String token = UUID.randomUUID().toString();
-        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, TokenStatus.WAITING);
+        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, TokenStatus.WAITING, null);
         WaitingQueue waitingQueue = waitingQueueService.createWaitingQueue(command);
         assertThat(waitingQueue.getToken()).isEqualTo(token);
 
@@ -44,7 +50,7 @@ public class WaitingQueueIntegrationTest {
     void getWaitingQueue() {
         // given
         String token = UUID.randomUUID().toString();
-        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, TokenStatus.WAITING);
+        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, TokenStatus.WAITING,null);
         WaitingQueue waitingQueue = waitingQueueService.createWaitingQueue(command);
         // when
         WaitingQueueQuery.GetQueue query = new WaitingQueueQuery.GetQueue(token);
@@ -59,7 +65,7 @@ public class WaitingQueueIntegrationTest {
         // given
         String token = UUID.randomUUID().toString();
         String token2 = UUID.randomUUID().toString();
-        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, TokenStatus.WAITING);
+        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, TokenStatus.WAITING,null);
         WaitingQueue waitingQueue = waitingQueueService.createWaitingQueue(command);
         // when
         WaitingQueueQuery.GetQueue query = new WaitingQueueQuery.GetQueue(token2);
@@ -75,7 +81,7 @@ public class WaitingQueueIntegrationTest {
     void throwException_when_getWaitingQueueStatus() {
         // given
         String token = UUID.randomUUID().toString();
-        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, TokenStatus.ACTIVATE);
+        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, TokenStatus.ACTIVATE,null);
         waitingQueueService.createWaitingQueue(command);
         // when
         WaitingQueueQuery.GetQueue query = new WaitingQueueQuery.GetQueue(token);
@@ -93,12 +99,12 @@ public class WaitingQueueIntegrationTest {
         for (int i = 0; i < 120; i++) {
             String token = "token" + i;
             boolean isCreatingActiveQueue = waitingQueueService.createActivationQueueImmediately();
-            WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, isCreatingActiveQueue ? TokenStatus.ACTIVATE : TokenStatus.WAITING);
+            WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, isCreatingActiveQueue ? TokenStatus.ACTIVATE : TokenStatus.WAITING, null);
             waitingQueueService.createWaitingQueue(command);
         }
 
         String token = "token120";
-        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, TokenStatus.WAITING);
+        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, TokenStatus.WAITING, null);
         waitingQueueService.createWaitingQueue(command);
 
         // when
@@ -109,23 +115,6 @@ public class WaitingQueueIntegrationTest {
         assertThat(waitingQueueOrder).isEqualTo(71L);
     }
 
-    @DisplayName("대기열이 만료될 경우 만료 상태로 변경해줘야한다.")
-    @Test
-    void updateWaitingQueueWhenExpired() {
-        // given
-        String token = UUID.randomUUID().toString();
-        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, TokenStatus.ACTIVATE);
-        WaitingQueue waitingQueue = waitingQueueService.createWaitingQueue(command);
-        // when
-        WaitingQueueCommand.Update update = new WaitingQueueCommand.Update(waitingQueue.getTokenId(),
-                                                                           TokenStatus.EXPIRED,
-                                                                           LocalDateTime.now());
-        waitingQueueService.updateWaitingQueue(update);
-        // then
-        WaitingQueue updatedWaitingQueue = waitingQueueService.getWaitingQueue(new WaitingQueueQuery.GetQueue(token));
-        assertThat(updatedWaitingQueue.getTokenStatus()).isEqualTo(TokenStatus.EXPIRED);
-    }
-
     @DisplayName("대기열에 있는 대기중인 토큰을 일정 시간마다 체크해 ACTIVATE로 변경해야한다.")
     @Test
     void updateWaitingQueueWhenChangeActivateStatusBySchedule() throws InterruptedException {
@@ -133,7 +122,7 @@ public class WaitingQueueIntegrationTest {
         for (int i = 0; i < 70; i++) {
             String token = "token" + i;
             boolean isCreatingActiveQueue = waitingQueueService.createActivationQueueImmediately();
-            WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, isCreatingActiveQueue ? TokenStatus.ACTIVATE : TokenStatus.WAITING);
+            WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, isCreatingActiveQueue ? TokenStatus.ACTIVATE : TokenStatus.WAITING, null);
             waitingQueueService.createWaitingQueue(command);
         }
 
@@ -160,8 +149,4 @@ public class WaitingQueueIntegrationTest {
         assertThat(waitingQueues.size()).isEqualTo(56);
 
     }
-
-
-
-
 }

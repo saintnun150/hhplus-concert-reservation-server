@@ -16,4 +16,5 @@ public interface WaitingQueueRepository {
     List<WaitingQueue> getWaitingQueues(WaitingQueueQuery.GetQueues query);
     void update(WaitingQueueCommand.Update command);
     void updateAll(WaitingQueueCommand.UpdateBatch command);
+    void deleteAll();
 }

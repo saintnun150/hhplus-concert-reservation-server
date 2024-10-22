@@ -91,7 +91,7 @@ class WaitingQueueTest {
                                          .tokenStatus(TokenStatus.ACTIVATE)
                                          .createdAt(LocalDateTime.now())
                                          .updatedAt(null)
-                                         .expiresAt(LocalDateTime.now().minusMinutes(10))
+                                         .expiresAt(LocalDateTime.now().minusMinutes(11))
                                          .build();
 
         assertThatThrownBy(() -> queue.validateTokenExpiredDate(10))

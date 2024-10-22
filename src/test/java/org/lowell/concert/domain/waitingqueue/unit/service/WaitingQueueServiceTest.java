@@ -39,7 +39,7 @@ class WaitingQueueServiceTest {
         // given
         String token = "token";
         TokenStatus status = TokenStatus.WAITING;
-        WaitingQueueCommand.Create create = new WaitingQueueCommand.Create(token, status);
+        WaitingQueueCommand.Create create = new WaitingQueueCommand.Create(token, status, null);
 
         when(waitingQueueRepository.createWaitingQueue(create))
                 .thenReturn(WaitingQueue.builder()
@@ -156,60 +156,6 @@ class WaitingQueueServiceTest {
         List<WaitingQueue> waitingQueues = waitingQueueService.getWaitingQueueByStatus(query);
         // then
         assertThat(waitingQueues).hasSize(1);
-    }
-
-    @DisplayName("대기열 업데이트 시 토큰 ID가 없으면 예외가 발생한다.")
-    @Test
-    void throwExceptionWhenTokenIdIsNullForUpdate() {
-        // given
-        WaitingQueueCommand.Update update = new WaitingQueueCommand.Update(null, TokenStatus.EXPIRED, LocalDateTime.now());
-        // then
-        Assertions.assertThatThrownBy(() -> waitingQueueService.updateWaitingQueue(update))
-                  .isInstanceOfSatisfying(DomainException.class, e -> {
-                      assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.EMPTY_TOKEN_ID);
-                  });
-    }
-
-    @DisplayName("대기열 업데이트 시 토큰 상태가 유효하지 않으면 예외가 발생한다.")
-    @Test
-    void throwExceptionWhenTokenStatusIsInvalidForUpdate() {
-        // given
-        WaitingQueueCommand.Update update = new WaitingQueueCommand.Update(1L, null, LocalDateTime.now());
-        // then
-        Assertions.assertThatThrownBy(() -> waitingQueueService.updateWaitingQueue(update))
-                  .isInstanceOfSatisfying(DomainException.class, e -> {
-                      assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT);
-                  });
-    }
-
-    @DisplayName("대기열 업데이트 시 변경 하려는 토큰 ID들이 없으면 예외가 발생한다.")
-    @Test
-    void throwExceptionWhenTokenIdsIsEmptyForUpdate() {
-        // given
-        WaitingQueueCommand.UpdateBatch update = new WaitingQueueCommand.UpdateBatch(List.of(),
-                                                                                     TokenStatus.EXPIRED,
-                                                                                     LocalDateTime.now(),
-                                                                                     LocalDateTime.now().plusDays(1));
-        // then
-        Assertions.assertThatThrownBy(() -> waitingQueueService.updateWaitingQueues(update))
-                  .isInstanceOfSatisfying(DomainException.class, e -> {
-                      assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.EMPTY_TOKEN_IDS);
-                  });
-    }
-
-    @DisplayName("대기열 업데이트 시 토큰 만료일이 현재 시간보다 이전이면 예외가 발생한다.")
-    @Test
-    void throwExceptionWhenExpiresAtIsBeforeNowForUpdate() {
-        // given
-        WaitingQueueCommand.UpdateBatch update = new WaitingQueueCommand.UpdateBatch(List.of(1L, 2L),
-                                                                                     TokenStatus.EXPIRED,
-                                                                                     LocalDateTime.now(),
-                                                                                     LocalDateTime.now().minusDays(1));
-        // then
-        Assertions.assertThatThrownBy(() -> waitingQueueService.updateWaitingQueues(update))
-                  .isInstanceOfSatisfying(DomainException.class, e -> {
-                      assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.INVALID_TOKEN_EXPIRES_DATE);
-                  });
     }
 
 }

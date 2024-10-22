@@ -21,7 +21,7 @@ public interface WaitingQueueTokenJpaRepository extends JpaRepository<WaitingQue
             " select t" +
             " from WaitingQueue t" +
             " where t.tokenStatus =:status" +
-            " order by t.createdAt desc")
+            " order by t.createdAt")
     List<WaitingQueue> findWaitingQueuesByStatus(TokenStatus status, Pageable pageable);
 
     @Transactional
