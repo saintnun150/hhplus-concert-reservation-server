@@ -12,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
@@ -31,7 +33,7 @@ class ConcertReservationServiceTest {
     void testGetConcertReservation_NotFound() {
         Long reservationId = 1L;
         ConcertReservationQuery.Search query = new ConcertReservationQuery.Search(reservationId);
-        when(reservationRepository.getConcertReservation(query)).thenReturn(null);
+        when(reservationRepository.getConcertReservation(query)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.getConcertReservation(query))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {

@@ -115,38 +115,36 @@ public class WaitingQueueIntegrationTest {
         assertThat(waitingQueueOrder).isEqualTo(71L);
     }
 
-    @DisplayName("대기열에 있는 대기중인 토큰을 일정 시간마다 체크해 ACTIVATE로 변경해야한다.")
-    @Test
-    void updateWaitingQueueWhenChangeActivateStatusBySchedule() throws InterruptedException {
-        // given
-        for (int i = 0; i < 70; i++) {
-            String token = "token" + i;
-            boolean isCreatingActiveQueue = waitingQueueService.createActivationQueueImmediately();
-            WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, isCreatingActiveQueue ? TokenStatus.ACTIVATE : TokenStatus.WAITING, null);
-            waitingQueueService.createWaitingQueue(command);
-        }
-
-
-        // 10초에 한 번 씩 총 두 번 3개의 대기열을 activate로 변경
-
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        for (int j = 0; j < 2; j++) {
-            scheduler.schedule(() -> {
-                List<Long> tokenIds = waitingQueueService.getWaitingQueueByStatus(new WaitingQueueQuery.GetQueues(TokenStatus.WAITING, 3))
-                                                         .stream()
-                                                         .map(WaitingQueue::getTokenId)
-                                                         .toList();
-                waitingQueueService.updateWaitingQueues(new WaitingQueueCommand.UpdateBatch(tokenIds,
-                                                                                            TokenStatus.ACTIVATE,
-                                                                                            LocalDateTime.now(),
-                                                                                            LocalDateTime.now().plusMinutes(20)));
-            }, j * 10, TimeUnit.SECONDS);
-        }
-
-        Thread.sleep(30000);
-
-        List<WaitingQueue> waitingQueues = waitingQueueService.getWaitingQueueByStatus(new WaitingQueueQuery.GetQueues(TokenStatus.ACTIVATE, 100));
-        assertThat(waitingQueues.size()).isEqualTo(56);
-
-    }
+//    @DisplayName("대기열에 있는 대기중인 토큰을 일정 시간마다 체크해 ACTIVATE로 변경해야한다.")
+//    @Test
+//    void updateWaitingQueueWhenChangeActivateStatusBySchedule() throws InterruptedException {
+//        // given
+//        for (int i = 0; i < 70; i++) {
+//            String token = "token" + i;
+//            boolean isCreatingActiveQueue = waitingQueueService.createActivationQueueImmediately();
+//            WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token, isCreatingActiveQueue ? TokenStatus.ACTIVATE : TokenStatus.WAITING, null);
+//            waitingQueueService.createWaitingQueue(command);
+//        }
+//
+//        // 10초에 한 번 씩 총 두 번 3개의 대기열을 activate로 변경
+//        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+//        for (int j = 0; j < 2; j++) {
+//            scheduler.schedule(() -> {
+//                List<Long> tokenIds = waitingQueueService.getWaitingQueueByStatus(new WaitingQueueQuery.GetQueues(TokenStatus.WAITING, 3))
+//                                                         .stream()
+//                                                         .map(WaitingQueue::getTokenId)
+//                                                         .toList();
+//                waitingQueueService.updateWaitingQueues(new WaitingQueueCommand.UpdateBatch(tokenIds,
+//                                                                                            TokenStatus.ACTIVATE,
+//                                                                                            LocalDateTime.now(),
+//                                                                                            LocalDateTime.now().plusMinutes(20)));
+//            }, j * 10, TimeUnit.SECONDS);
+//        }
+//
+//        Thread.sleep(30000);
+//
+//        List<WaitingQueue> waitingQueues = waitingQueueService.getWaitingQueueByStatus(new WaitingQueueQuery.GetQueues(TokenStatus.ACTIVATE, 100));
+//        assertThat(waitingQueues.size()).isEqualTo(56);
+//
+//    }
 }

@@ -66,12 +66,11 @@ public class WaitingQueue {
         if (tokenStatus != TokenStatus.ACTIVATE) {
             throw DomainException.create(WaitingQueueErrorCode.NOT_ACTIVATE_STATUS);
         }
-
     }
 
-    public void validateTokenExpiredDate(long timeToLive) {
+    public void validateTokenExpiredDate(LocalDateTime now, long timeToLive) {
         validateActivateStatus();
-        if (expiresAt == null || LocalDateTime.now().isAfter(expiresAt.plusMinutes(timeToLive))) {
+        if (expiresAt == null || now.isAfter(expiresAt.plusMinutes(timeToLive))) {
             throw DomainException.create(WaitingQueueErrorCode.TOKEN_EXPIRED);
         }
     }
@@ -83,9 +82,9 @@ public class WaitingQueue {
         this.expiresAt = now.plusMinutes(timeToLive);
     }
 
-    public void expiredToken(LocalDateTime now) {
-        validateActivateStatus();
-        tokenStatus = TokenStatus.EXPIRED;
+    public void expiredToken(LocalDateTime now, long timeToLive) {
+        validateTokenExpiredDate(now, timeToLive);
+        this.tokenStatus = TokenStatus.EXPIRED;
         this.updatedAt = now;
     }
 

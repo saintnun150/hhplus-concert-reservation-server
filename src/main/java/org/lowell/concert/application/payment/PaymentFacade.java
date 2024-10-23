@@ -36,10 +36,11 @@ public class PaymentFacade {
     @Transactional
     public void payment(Long reservationId, String token) {
         ConcertReservation reservation = concertReservationService.getConcertReservation(new ConcertReservationQuery.Search(reservationId));
+        reservation.isReservableStatus();
         ConcertSeat concertSeat = concertSeatService.getConcertSeatWithLock(new ConcertSeatQuery.Search(reservation.getSeatId()));
 
         LocalDateTime paymentTime = LocalDateTime.now();
-        concertSeat.checkAvailableSeat(paymentTime, ConcertPolicy.TEMP_RESERVED_MINUTES);
+        concertSeat.checkAvailableSeat(paymentTime, ConcertPolicy.TEMP_RESERVED_SEAT_MINUTES);
 
         Long userId = reservation.getUserId();
         User user = userService.getUser(userId);
@@ -52,7 +53,7 @@ public class PaymentFacade {
         reservation.completeReservation(paymentTime);
 
         WaitingQueue waitingQueue = waitingQueueService.getWaitingQueue(new WaitingQueueQuery.GetQueue(token));
-        waitingQueue.expiredToken(paymentTime);
+        waitingQueue.expiredToken(paymentTime, ConcertPolicy.EXPIRED_QUEUE_MINUTES);
 
         paymentService.createPayment(new PaymentCommand.Create(reservation.getReservationId(), price, PaymentStatus.APPROVED));
 

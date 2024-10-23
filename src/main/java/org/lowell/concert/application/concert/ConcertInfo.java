@@ -1,6 +1,5 @@
 package org.lowell.concert.application.concert;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.lowell.concert.domain.concert.model.ReservationStatus;
@@ -28,7 +27,7 @@ public class ConcertInfo {
         private final Long concertScheduleId;
         private final int seatNo;
         private final SeatStatus status;
-        private final int price;
+        private final long price;
     }
 
     @Getter

@@ -94,7 +94,7 @@ class WaitingQueueTest {
                                          .expiresAt(LocalDateTime.now().minusMinutes(11))
                                          .build();
 
-        assertThatThrownBy(() -> queue.validateTokenExpiredDate(10))
+        assertThatThrownBy(() -> queue.validateTokenExpiredDate(LocalDateTime.now(), 10))
                 .isInstanceOfSatisfying(DomainException.class, e -> {
                     assertEquals(WaitingQueueErrorCode.TOKEN_EXPIRED, e.getErrorCode());
                 });

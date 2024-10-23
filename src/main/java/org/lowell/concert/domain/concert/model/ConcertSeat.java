@@ -31,7 +31,7 @@ public class ConcertSeat {
     private SeatStatus status;
 
     @Column(name = "price")
-    private int price;
+    private long price;
 
     @Column(name = "temp_reserved_at")
     private LocalDateTime tempReservedAt;
@@ -40,7 +40,7 @@ public class ConcertSeat {
     private LocalDateTime reservedAt;
 
     @Builder
-    public ConcertSeat(Long seatId, Long concertScheduleId, int seatNo, SeatStatus status, int price, LocalDateTime tempReservedAt, LocalDateTime reservedAt) {
+    public ConcertSeat(Long seatId, Long concertScheduleId, int seatNo, SeatStatus status, long price, LocalDateTime tempReservedAt, LocalDateTime reservedAt) {
         this.seatId = seatId;
         this.concertScheduleId = concertScheduleId;
         this.seatNo = seatNo;
@@ -54,27 +54,37 @@ public class ConcertSeat {
         return status == SeatStatus.EMPTY;
     }
 
+    public boolean isTemporaryReserved(LocalDateTime now, int tempReservedMinutes) {
+        if (tempReservedAt == null) {
+            return false;
+        }
+        if (tempReservedAt.plusMinutes(tempReservedMinutes).isAfter(now)) {
+            return false;
+        }
+        return true;
+    }
+
     public void isCompletedReserved() {
         if (reservedAt != null) {
             throw new DomainException(ConcertSeatErrorCode.RESERVED_COMPLETE);
         }
     }
 
-    public void isTemporaryReservedExpired(LocalDateTime now, int tempReservedMinutes) {
+    public void checkTemporaryReservedExpired(LocalDateTime now, int tempReservedMinutes) {
         if (tempReservedAt != null && tempReservedAt.plusMinutes(tempReservedMinutes).isBefore(now)) {
             throw new DomainException(ConcertSeatErrorCode.RESERVED_EXPIRED);
         }
     }
 
-    public void isTemporaryReserved(LocalDateTime now, int tempReservedMinutes) {
-        if (tempReservedAt != null && tempReservedAt.plusMinutes(tempReservedMinutes).isAfter(now)) {
-            throw new DomainException(ConcertSeatErrorCode.RESERVED_TEMPORARY);
-        }
-    }
+//    public void isTemporaryReserved(LocalDateTime now, int tempReservedMinutes) {
+//        if (tempReservedAt != null && tempReservedAt.plusMinutes(tempReservedMinutes).isAfter(now)) {
+//            throw new DomainException(ConcertSeatErrorCode.RESERVED_TEMPORARY);
+//        }
+//    }
 
     public void checkAvailableSeat(LocalDateTime now, int tempReservedMinutes) {
         isCompletedReserved();
-        isTemporaryReservedExpired(now, tempReservedMinutes);
+        checkTemporaryReservedExpired(now, tempReservedMinutes);
     }
 
     public void reserveSeatTemporarily(LocalDateTime time) {

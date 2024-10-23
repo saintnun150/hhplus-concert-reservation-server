@@ -28,7 +28,7 @@ public class ConcertService {
 
     public Concert getConcert(long id) {
         Concert concert = concertRepository.getConcert(id)
-                                           .orElseThrow();
+                                           .orElseThrow(() -> new DomainException(ConcertErrorCode.NOT_FOUND_CONCERT));
         return concert;
     }
 

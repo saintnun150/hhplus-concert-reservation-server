@@ -2,6 +2,7 @@ package org.lowell.concert.domain.concert.service;
 
 import lombok.RequiredArgsConstructor;
 import org.lowell.concert.domain.common.exception.DomainException;
+import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.concert.dto.ConcertSeatCommand;
 import org.lowell.concert.domain.concert.dto.ConcertSeatQuery;
 import org.lowell.concert.domain.concert.exception.ConcertSeatErrorCode;
@@ -43,9 +44,8 @@ public class ConcertSeatService {
 
     public List<ConcertSeat> getAvailableSeats(ConcertSeatQuery.SearchList query) {
         List<ConcertSeat> concertSeats = getConcertSeats(query).stream()
-                                                               .filter(ConcertSeat::isEmpty)
+                                                               .filter(seat -> seat.isEmpty() || seat.isTemporaryReserved(query.now(), ConcertPolicy.TEMP_RESERVED_SEAT_MINUTES))
                                                                .toList();
-
         if (CollectionUtils.isEmpty(concertSeats)) {
             throw new DomainException(ConcertSeatErrorCode.NOT_FOUND_AVAILABLE_SEAT);
         }

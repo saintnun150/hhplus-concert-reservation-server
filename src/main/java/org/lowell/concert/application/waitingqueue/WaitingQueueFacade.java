@@ -55,6 +55,6 @@ public class WaitingQueueFacade {
         waitingQueueService.updateWaitingQueues(new WaitingQueueCommand.UpdateBatch(null,
                                                                                     TokenStatus.ACTIVATE,
                                                                                     now,
-                                                                                    now.plusMinutes(ConcertPolicy.TEMP_RESERVED_MINUTES)));
+                                                                                    now.plusMinutes(ConcertPolicy.EXPIRED_QUEUE_MINUTES)));
     }
 }

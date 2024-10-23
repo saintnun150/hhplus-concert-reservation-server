@@ -48,9 +48,9 @@ public class ConcertFacade {
         return scheduleInfoList;
     }
 
-    public List<ConcertInfo.SeatInfo> getAvailableConcertSeats(Long concertScheduleId) {
+    public List<ConcertInfo.SeatInfo> getAvailableConcertSeats(Long concertScheduleId, LocalDateTime now) {
         ConcertSchedule schedule = concertScheduleService.getConcertSchedule(concertScheduleId);
-        List<ConcertSeat> availableSeats = concertSeatService.getAvailableSeats(new ConcertSeatQuery.SearchList(schedule.getScheduleId()));
+        List<ConcertSeat> availableSeats = concertSeatService.getAvailableSeats(new ConcertSeatQuery.SearchList(schedule.getScheduleId(), now));
         List<ConcertInfo.SeatInfo> seatInfoList =
                 availableSeats.stream()
                               .map(seat -> new ConcertInfo.SeatInfo(seat.getSeatId(),
@@ -67,7 +67,7 @@ public class ConcertFacade {
         User user = userService.getUser(userId);
 
         ConcertSeat seat = concertSeatService.getConcertSeatWithLock(new ConcertSeatQuery.Search(seatId));
-        seat.checkAvailableSeat(LocalDateTime.now(), ConcertPolicy.TEMP_RESERVED_MINUTES);
+        seat.checkAvailableSeat(LocalDateTime.now(), ConcertPolicy.TEMP_RESERVED_SEAT_MINUTES);
         seat.reserveSeatTemporarily(LocalDateTime.now());
 
         ConcertReservation reservation = concertReservationService.createConcertReservation(new ConcertReservationCommand.Create(seat.getSeatId(),

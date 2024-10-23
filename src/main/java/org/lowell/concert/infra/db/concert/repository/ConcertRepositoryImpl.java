@@ -29,7 +29,6 @@ public class ConcertRepositoryImpl implements ConcertRepository {
         return jpaRepository.findById(concertId);
     }
 
-
     @Override
     public List<Concert> getConcerts() {
         return jpaRepository.findAllByDeletedAtIsNull();
