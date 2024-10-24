@@ -4,7 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.payment.dto.PaymentCommand;
-import org.lowell.concert.domain.payment.exception.PaymentErrorCode;
+import org.lowell.concert.domain.payment.exception.PaymentError;
 import org.lowell.concert.domain.payment.model.PaymentStatus;
 import org.lowell.concert.domain.payment.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ class PaymentServiceTest {
         paymentService.createPayment(new PaymentCommand.Create(1L, 1000L, PaymentStatus.APPROVED));
         assertThatThrownBy(() -> paymentService.getPayment(2L))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(PaymentErrorCode.NOT_FOUND_PAYMENT);
+                    assertThat(ex.getDomainError()).isEqualTo(PaymentError.NOT_FOUND_PAYMENT);
                 });
     }
 

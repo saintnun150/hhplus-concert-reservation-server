@@ -4,16 +4,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.domain.common.exception.DomainException;
-import org.lowell.concert.domain.concert.exception.ConcertReservationErrorCode;
-import org.lowell.concert.domain.concert.exception.ConcertSeatErrorCode;
+import org.lowell.concert.domain.concert.exception.ConcertReservationError;
+import org.lowell.concert.domain.concert.exception.ConcertSeatError;
 import org.lowell.concert.domain.concert.model.ConcertReservation;
 import org.lowell.concert.domain.concert.model.ConcertSeat;
 import org.lowell.concert.domain.concert.model.ReservationStatus;
 import org.lowell.concert.domain.concert.model.SeatStatus;
-import org.lowell.concert.domain.user.exception.UserAccountErrorCode;
+import org.lowell.concert.domain.user.exception.UserAccountError;
 import org.lowell.concert.domain.user.model.User;
 import org.lowell.concert.domain.user.model.UserAccount;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueErrorCode;
+import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
 import org.lowell.concert.infra.db.concert.repository.ConcertReservationJpaRepository;
@@ -69,7 +69,7 @@ public class PaymentFacadeTest {
 
         assertThatThrownBy(() -> paymentFacade.payment(reservationId, token))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertReservationErrorCode.NOT_FOUND_RESERVATION);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertReservationError.NOT_FOUND_RESERVATION);
                 });
     }
 
@@ -85,7 +85,7 @@ public class PaymentFacadeTest {
 
         assertThatThrownBy(() -> paymentFacade.payment(saved.getReservationId(), "token"))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertSeatErrorCode.NOT_FOUND_SEAT);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertSeatError.NOT_FOUND_SEAT);
                 });
     }
 
@@ -108,7 +108,7 @@ public class PaymentFacadeTest {
 
         assertThatThrownBy(() -> paymentFacade.payment(saved.getReservationId(), "token"))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertSeatErrorCode.RESERVED_EXPIRED);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertSeatError.RESERVED_EXPIRED);
                 });
     }
 
@@ -138,7 +138,7 @@ public class PaymentFacadeTest {
 
         assertThatThrownBy(() -> paymentFacade.payment(saved.getReservationId(), "token"))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertSeatErrorCode.RESERVED_COMPLETE);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertSeatError.RESERVED_COMPLETE);
                 });
     }
 
@@ -175,7 +175,7 @@ public class PaymentFacadeTest {
 
         assertThatThrownBy(() -> paymentFacade.payment(saved.getReservationId(), "token"))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(UserAccountErrorCode.EXCEED_BALANCE);
+                    assertThat(ex.getDomainError()).isEqualTo(UserAccountError.EXCEED_BALANCE);
                 });
     }
 
@@ -217,7 +217,7 @@ public class PaymentFacadeTest {
 
         assertThatThrownBy(() -> paymentFacade.payment(saved.getReservationId(), "token"))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(WaitingQueueErrorCode.TOKEN_EXPIRED);
+                    assertThat(ex.getDomainError()).isEqualTo(WaitingQueueError.TOKEN_EXPIRED);
                 });
     }
 
