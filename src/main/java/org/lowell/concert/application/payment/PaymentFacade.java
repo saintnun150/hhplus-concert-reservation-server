@@ -58,6 +58,7 @@ public class PaymentFacade {
 
         Payment payment = paymentService.createPayment(new PaymentCommand.Create(reservation.getReservationId(), price, PaymentStatus.APPROVED));
         return new PaymentInfo.Info(payment.getPaymentId(),
+                                    payment.getReservationId(),
                                     payment.getPayAmount(),
                                     payment.getCreatedAt());
     }
