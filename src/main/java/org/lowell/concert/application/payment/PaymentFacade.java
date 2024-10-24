@@ -36,7 +36,7 @@ public class PaymentFacade {
 
     @Transactional
     public PaymentInfo.Info payment(Long reservationId, String token) {
-        ConcertReservation reservation = concertReservationService.getConcertReservation(new ConcertReservationQuery.Search(reservationId));
+        ConcertReservation reservation = concertReservationService.getConcertReservationWithLock(new ConcertReservationQuery.Search(reservationId));
         reservation.isReservableStatus();
         ConcertSeat concertSeat = concertSeatService.getConcertSeatWithLock(new ConcertSeatQuery.Search(reservation.getSeatId()));
 
