@@ -41,7 +41,7 @@ public class PaymentFacade {
         ConcertSeat concertSeat = concertSeatService.getConcertSeatWithLock(new ConcertSeatQuery.Search(reservation.getSeatId()));
 
         LocalDateTime paymentTime = LocalDateTime.now();
-        concertSeat.checkAvailableSeat(paymentTime, ConcertPolicy.TEMP_RESERVED_SEAT_MINUTES);
+        concertSeat.checkPayableSeat(paymentTime, ConcertPolicy.TEMP_RESERVED_SEAT_MINUTES);
 
         Long userId = reservation.getUserId();
         User user = userService.getUser(userId);

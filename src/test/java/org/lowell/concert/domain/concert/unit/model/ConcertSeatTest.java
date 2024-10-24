@@ -30,7 +30,7 @@ class ConcertSeatTest {
                                       .reservedAt(LocalDateTime.now())
                                       .build();
 
-        assertThatThrownBy(() -> concertSeat.checkAvailableSeat(now, 5))
+        assertThatThrownBy(() -> concertSeat.checkReservableSeat(now, 5))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
                     assertThat(ex.getDomainError()).isEqualTo(ConcertSeatError.RESERVED_COMPLETE);
                 });
@@ -53,7 +53,7 @@ class ConcertSeatTest {
                                       .reservedAt(null)
                                       .build();
 
-        assertThatThrownBy(() -> concertSeat.checkAvailableSeat(now, tempReservedMinutes))
+        assertThatThrownBy(() -> concertSeat.checkTemporaryReservedExpired(now, tempReservedMinutes))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
                     assertThat(ex.getDomainError()).isEqualTo(ConcertSeatError.RESERVED_EXPIRED);
                 });
@@ -76,7 +76,7 @@ class ConcertSeatTest {
                                       .reservedAt(null)
                                       .build();
 
-        concertSeat.checkAvailableSeat(now, tempReservedMinutes);
+        concertSeat.checkReservableSeat(now, tempReservedMinutes);
         concertSeat.reserveSeatTemporarily(now);
 
         assertThat(concertSeat.getTempReservedAt()).isNotNull();
