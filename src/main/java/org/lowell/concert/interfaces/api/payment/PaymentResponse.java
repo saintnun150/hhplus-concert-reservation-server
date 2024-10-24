@@ -15,21 +15,12 @@ public class PaymentResponse {
     public static class Info {
         @Schema(description = "결제 Id")
         private final Long paymentId;
-
-        @Schema(description = "콘서트 Id")
-        private final Long concertId;
-
-        @Schema(description = "콘서트 이름")
-        private final String concertName;
-
-        @Schema(description = "좌석 정보")
-        private final Long seatNo;
-
+        @Schema(description = "예약 Id")
+        private final Long reservationId;
         @Schema(description = "결제 금액")
-        private final Long price;
-
+        private final Long payAmount;
         @Schema(description = "결제 완료 시간")
-        private final LocalDateTime completedAt;
+        private final LocalDateTime createdAt;
 
     }
 }

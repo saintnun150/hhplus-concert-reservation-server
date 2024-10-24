@@ -9,8 +9,8 @@ import org.lowell.concert.interfaces.api.common.ApiResponse;
 public interface WaitingQueueApiDocs {
 
     @Operation(summary = "대기열 토큰 발급", description = "사용자 ID를 통해 대기열 토큰을 반환하거나 생성후 토큰 정보를 반환")
-    ApiResponse<WaitingQueueResponse.CreatedQueueInfo> createQueue(WaitingQueueRequest.CreateQueue request);
+    ApiResponse<WaitingQueueResponse.QueueInfo> createQueue(WaitingQueueRequest.CreateQueue request);
 
     @Operation(summary = "대기열 토큰 상태 조회", description = "token으로 조회하여 현재 대기열 상태 정보 반환")
-    ApiResponse<WaitingQueueResponse.CurrentQueueInfo> getCurrentQueue(@Parameter(hidden = true) String tokenStr);
+    ApiResponse<WaitingQueueResponse.QueueOrderInfo> getQueueOrder(@Parameter(hidden = true) String tokenStr);
 }

@@ -9,7 +9,7 @@ public class UserRequest {
     @AllArgsConstructor
     @Builder
     public static class ChargeAccount {
-        private final Long balance;
+        private final long balance;
 
     }
 }

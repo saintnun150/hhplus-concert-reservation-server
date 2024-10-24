@@ -9,6 +9,7 @@ import org.lowell.concert.domain.concert.model.ConcertSeat;
 import org.lowell.concert.domain.concert.service.ConcertReservationService;
 import org.lowell.concert.domain.concert.service.ConcertSeatService;
 import org.lowell.concert.domain.payment.dto.PaymentCommand;
+import org.lowell.concert.domain.payment.model.Payment;
 import org.lowell.concert.domain.payment.model.PaymentStatus;
 import org.lowell.concert.domain.payment.service.PaymentService;
 import org.lowell.concert.domain.user.model.User;
@@ -34,7 +35,7 @@ public class PaymentFacade {
     private final WaitingQueueService waitingQueueService;
 
     @Transactional
-    public void payment(Long reservationId, String token) {
+    public PaymentInfo.Info payment(Long reservationId, String token) {
         ConcertReservation reservation = concertReservationService.getConcertReservation(new ConcertReservationQuery.Search(reservationId));
         reservation.isReservableStatus();
         ConcertSeat concertSeat = concertSeatService.getConcertSeatWithLock(new ConcertSeatQuery.Search(reservation.getSeatId()));
@@ -55,8 +56,10 @@ public class PaymentFacade {
         WaitingQueue waitingQueue = waitingQueueService.getWaitingQueue(new WaitingQueueQuery.GetQueue(token));
         waitingQueue.expiredToken(paymentTime, ConcertPolicy.EXPIRED_QUEUE_MINUTES);
 
-        paymentService.createPayment(new PaymentCommand.Create(reservation.getReservationId(), price, PaymentStatus.APPROVED));
-
+        Payment payment = paymentService.createPayment(new PaymentCommand.Create(reservation.getReservationId(), price, PaymentStatus.APPROVED));
+        return new PaymentInfo.Info(payment.getPaymentId(),
+                                    payment.getPayAmount(),
+                                    payment.getCreatedAt());
     }
 
 
