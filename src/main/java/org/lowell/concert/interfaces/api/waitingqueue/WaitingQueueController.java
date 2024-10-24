@@ -2,7 +2,7 @@ package org.lowell.concert.interfaces.api.waitingqueue;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
-import org.lowell.concert.interfaces.api.common.ApiResponse;
+import org.lowell.concert.interfaces.api.common.support.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;

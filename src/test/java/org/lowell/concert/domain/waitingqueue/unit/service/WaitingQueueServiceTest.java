@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueErrorCode;
+import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
@@ -65,11 +65,11 @@ class WaitingQueueServiceTest {
         WaitingQueueQuery.GetQueue query = new WaitingQueueQuery.GetQueue(token);
 
         when(waitingQueueRepository.getWaitingQueue(query))
-                .thenThrow(DomainException.create(WaitingQueueErrorCode.NOT_FOUND_TOKEN));
+                .thenThrow(DomainException.create(WaitingQueueError.NOT_FOUND_TOKEN));
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.getWaitingQueue(query))
                   .isInstanceOfSatisfying(DomainException.class, e -> {
-                      assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.NOT_FOUND_TOKEN);
+                      assertThat(e.getDomainError()).isEqualTo(WaitingQueueError.NOT_FOUND_TOKEN);
                   });
     }
 
@@ -93,7 +93,7 @@ class WaitingQueueServiceTest {
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.getWaitingQueueOrder(query))
                   .isInstanceOfSatisfying(DomainException.class, e -> {
-                      assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.NOT_WAITING_STATUS);
+                      assertThat(e.getDomainError()).isEqualTo(WaitingQueueError.NOT_WAITING_STATUS);
                   });
     }
 
@@ -120,7 +120,7 @@ class WaitingQueueServiceTest {
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.getWaitingQueueOrder(query))
                   .isInstanceOfSatisfying(DomainException.class, e -> {
-                      assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.INVALID_WAITING_ORDER);
+                      assertThat(e.getDomainError()).isEqualTo(WaitingQueueError.INVALID_WAITING_ORDER);
                   });
     }
 

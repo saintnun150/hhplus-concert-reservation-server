@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueErrorCode;
+import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
@@ -26,18 +26,18 @@ public class WaitingQueueService {
 
     public WaitingQueue getWaitingQueue(WaitingQueueQuery.GetQueue query) {
         WaitingQueue queue = queueRepository.getWaitingQueue(query)
-                                            .orElseThrow(() -> DomainException.create(WaitingQueueErrorCode.NOT_FOUND_TOKEN));
+                                            .orElseThrow(() -> DomainException.create(WaitingQueueError.NOT_FOUND_TOKEN));
         return queue;
     }
 
     public Long getWaitingQueueOrder(WaitingQueueQuery.GetQueue query) {
         WaitingQueue queue = queueRepository.getWaitingQueue(query)
-                                            .orElseThrow(() -> DomainException.create(WaitingQueueErrorCode.NOT_FOUND_TOKEN));
+                                            .orElseThrow(() -> DomainException.create(WaitingQueueError.NOT_FOUND_TOKEN));
         queue.validateWaitingStatus();
 
         Long waitingOrder = queueRepository.getWaitingOrder(new WaitingQueueQuery.Order(queue.getTokenId(), TokenStatus.WAITING));
         if (waitingOrder == null) {
-            throw DomainException.create(WaitingQueueErrorCode.INVALID_WAITING_ORDER);
+            throw DomainException.create(WaitingQueueError.INVALID_WAITING_ORDER);
         }
         return waitingOrder;
     }
