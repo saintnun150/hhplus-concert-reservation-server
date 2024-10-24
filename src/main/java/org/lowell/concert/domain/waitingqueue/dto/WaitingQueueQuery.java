@@ -5,6 +5,8 @@ import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
+
 public class WaitingQueueQuery {
     public record GetQueue(String token) {
         public GetQueue {
@@ -13,9 +15,7 @@ public class WaitingQueueQuery {
             }
         }
     }
-
-    public record Order(long tokenId, TokenStatus tokenStatus) {
-    }
-
+    public record Order(long tokenId, TokenStatus tokenStatus) { }
+    public record CheckQueueActivation(String token, LocalDateTime now) {}
     public record GetQueues(TokenStatus tokenStatus, long size) { }
 }
