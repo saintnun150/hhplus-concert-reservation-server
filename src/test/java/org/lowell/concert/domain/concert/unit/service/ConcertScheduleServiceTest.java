@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.concert.dto.ConcertScheduleCommand;
 import org.lowell.concert.domain.concert.dto.ConcertScheduleQuery;
-import org.lowell.concert.domain.concert.exception.ConcertScheduleErrorCode;
+import org.lowell.concert.domain.concert.exception.ConcertScheduleError;
 import org.lowell.concert.domain.concert.repository.ConcertScheduleRepository;
 import org.lowell.concert.domain.concert.service.ConcertScheduleService;
 import org.mockito.InjectMocks;
@@ -34,13 +34,13 @@ class ConcertScheduleServiceTest {
         ConcertScheduleCommand.Create command = new ConcertScheduleCommand.Create(null, LocalDateTime.now(), null, null);
         assertThatThrownBy(() -> concertScheduleService.createConcertSchedule(command))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertScheduleErrorCode.INVALID_CONCERT_ID);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertScheduleError.INVALID_CONCERT_ID);
                 });
 
         ConcertScheduleCommand.Create command2 = new ConcertScheduleCommand.Create(1L, null, null, null);
         assertThatThrownBy(() -> concertScheduleService.createConcertSchedule(command2))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertScheduleErrorCode.INVALID_SCHEDULE_DATE);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertScheduleError.INVALID_SCHEDULE_DATE);
                 });
     }
 
@@ -51,7 +51,7 @@ class ConcertScheduleServiceTest {
         when(concertScheduleRepository.getConcertDates(1L, LocalDateTime.now())).thenReturn(null);
         assertThatThrownBy(() -> concertScheduleService.getConcertSchedules(query))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertScheduleErrorCode.NOT_FOUND_CONCERT_SCHEDULE);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertScheduleError.NOT_FOUND_CONCERT_SCHEDULE);
                 });
     }
 
