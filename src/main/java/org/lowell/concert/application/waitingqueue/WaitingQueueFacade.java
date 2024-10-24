@@ -58,4 +58,8 @@ public class WaitingQueueFacade {
                                                     now,
                                                     now.plusMinutes(ConcertPolicy.EXPIRED_QUEUE_MINUTES)));
     }
+
+    public void checkWaitingQueueActivate(String token, LocalDateTime now) {
+        waitingQueueService.checkWaitingQueueActivate(new WaitingQueueQuery.CheckQueueActivation(token, now));
+    }
 }

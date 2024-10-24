@@ -85,4 +85,9 @@ public class WaitingQueueService {
                                                       command.expiresAt());
         queueRepository.updateAll(command);
     }
+
+    public void checkWaitingQueueActivate(WaitingQueueQuery.CheckQueueActivation query) {
+        WaitingQueue waitingQueue = getWaitingQueue(new WaitingQueueQuery.GetQueue(query.token()));
+        waitingQueue.validateTokenExpiredDate(query.now(), ConcertPolicy.EXPIRED_QUEUE_MINUTES);
+    }
 }
