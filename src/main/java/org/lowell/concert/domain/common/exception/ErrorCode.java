@@ -1,9 +1,10 @@
 package org.lowell.concert.domain.common.exception;
 
 import lombok.Getter;
+import org.springframework.boot.logging.LogLevel;
 
 @Getter
-public enum ErrorCode {
+public enum ErrorCode implements DomainError {
     NOT_FOUND("리소스를 찾을 수 없습니다."),
     UNAUTHORIZED("인증이 필요합니다."),
     INTERNAL_SERVER("내부 서버 오류가 발생했습니다."),
@@ -18,4 +19,18 @@ public enum ErrorCode {
         this.defaultMessage = defaultMessage;
     }
 
+    @Override
+    public ErrorCode getCode() {
+        return this;
+    }
+
+    @Override
+    public String getMessage() {
+        return defaultMessage;
+    }
+
+    @Override
+    public LogLevel getLogLevel() {
+        return LogLevel.ERROR;
+    }
 }
