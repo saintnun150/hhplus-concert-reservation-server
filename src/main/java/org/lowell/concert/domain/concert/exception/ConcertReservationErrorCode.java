@@ -9,7 +9,8 @@ import org.lowell.concert.domain.common.exception.DomainErrorResponse;
 @RequiredArgsConstructor
 public enum ConcertReservationErrorCode implements DomainErrorCode {
     STATE_COMPLETE(404, "CONCERT_RESERVATION_ERR_01", "reservation state is already completed"),
-    NOT_FOUND_RESERVATION(404, "CONCERT_RESERVATION_ERR_02", "not fount reservation"),
+    STATE_EXPIRED(404, "CONCERT_RESERVATION_ERR_02", "reservation state is already expired"),
+    NOT_FOUND_RESERVATION(404, "CONCERT_RESERVATION_ERR_03", "not fount reservation"),
     ;
 
     private final int status;

@@ -1,31 +1,59 @@
 package org.lowell.concert.infra.db.concert.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.lowell.concert.application.concert.ConcertSeatMapper;
+import org.lowell.concert.domain.concert.dto.ConcertSeatCommand;
 import org.lowell.concert.domain.concert.dto.ConcertSeatQuery;
-import org.lowell.concert.domain.concert.model.ConcertSeatInfo;
+import org.lowell.concert.domain.concert.model.ConcertSeat;
 import org.lowell.concert.domain.concert.repository.ConcertSeatRepository;
-import org.lowell.concert.infra.db.concert.entity.ConcertSeatEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class ConcertSeatRepositoryImpl implements ConcertSeatRepository {
     private final ConcertSeatJpaRepository jpaRepository;
-    private final ConcertSeatMapper mapper;
 
     @Override
-    public ConcertSeatInfo getConcertSeat(ConcertSeatQuery.Search query) {
-        ConcertSeatEntity entity = jpaRepository.findByConcertDateIdAndSeatNo(query.concertDateId(),
-                                                                              query.seatNo());
-        return mapper.toPojo(entity);
+    public void createConcertSeat(ConcertSeatCommand.Create command) {
+        ConcertSeat entity = ConcertSeat.builder()
+                                        .concertScheduleId(command.scheduleId())
+                                        .seatNo(command.seatNo())
+                                        .status(command.status())
+                                        .price(command.price())
+                                        .build();
+        jpaRepository.save(entity);
+
     }
 
     @Override
-    public List<ConcertSeatInfo> getConcertSeats(ConcertSeatQuery.SearchList query) {
-        List<ConcertSeatEntity> entities = jpaRepository.findAllByConcertDateId(query.concertDateId());
-        return mapper.toPojoList(entities);
+    public Optional<ConcertSeat> getConcertSeat(ConcertSeatQuery.Search query) {
+        return jpaRepository.findById(query.seatId());
     }
+
+    @Override
+    public Optional<ConcertSeat> getConcertSeatWithLock(ConcertSeatQuery.Search query) {
+        return jpaRepository.findByIdWithLock(query.seatId());
+    }
+
+    @Override
+    public List<ConcertSeat> getConcertSeats(ConcertSeatQuery.SearchList query) {
+        List<ConcertSeat> entities = jpaRepository.findAllByConcertScheduleId(query.concertScheduleId());
+        return entities;
+    }
+
+    @Override
+    public void saveAll(List<ConcertSeat> concertSeats) {
+        jpaRepository.saveAll(concertSeats);
+    }
+
+    @Transactional
+    @Override
+    public void deleteAll() {
+        jpaRepository.deleteAll();
+    }
+
+
 }

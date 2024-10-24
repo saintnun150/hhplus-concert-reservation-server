@@ -1,53 +1,45 @@
 package org.lowell.concert.infra.db.concert.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.lowell.concert.application.concert.ConcertReservationMapper;
 import org.lowell.concert.domain.concert.dto.ConcertReservationCommand;
 import org.lowell.concert.domain.concert.dto.ConcertReservationQuery;
-import org.lowell.concert.domain.concert.model.ConcertReservationInfo;
+import org.lowell.concert.domain.concert.model.ConcertReservation;
 import org.lowell.concert.domain.concert.model.ReservationStatus;
 import org.lowell.concert.domain.concert.repository.ConcertReservationRepository;
-import org.lowell.concert.infra.db.concert.entity.ConcertReservationEntity;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class ConcertReservationRepositoryImpl implements ConcertReservationRepository {
     private final ConcertReservationJpaRepository jpaRepository;
-    private final ConcertReservationMapper mapper;
 
     @Override
-    public void createConcertReservation(ConcertReservationCommand.Create command) {
-        ConcertReservationEntity entity = ConcertReservationEntity.builder()
-                                                                  .seatId(command.seatId())
-                                                                  .userId(command.userId())
-                                                                  .status(ReservationStatus.RESERVED)
-                                                                  .createdAt(LocalDateTime.now())
-                                                                  .build();
-        jpaRepository.save(entity);
+    public ConcertReservation createConcertReservation(ConcertReservationCommand.Create command) {
+        ConcertReservation entity = ConcertReservation.builder()
+                                                      .seatId(command.seatId())
+                                                      .userId(command.userId())
+                                                      .status(ReservationStatus.PENDING)
+                                                      .createdAt(LocalDateTime.now())
+                                                      .build();
+        return jpaRepository.save(entity);
     }
 
     @Override
-    public ConcertReservationInfo getConcertReservation(ConcertReservationQuery.Search query) {
-        ConcertReservationEntity entity = jpaRepository.findById(query.concertReservationId())
-                                                       .orElse(null);
-        return mapper.toPojo(entity);
+    public Optional<ConcertReservation> getConcertReservation(ConcertReservationQuery.Search query) {
+        return jpaRepository.findById(query.concertReservationId());
     }
 
     @Override
-    public List<ConcertReservationInfo> getConcertReservations(ConcertReservationQuery.SearchList query) {
-        List<ConcertReservationEntity> entities = jpaRepository.findAllByUserId(query.userId());
-        return mapper.toPojoList(entities);
+    public List<ConcertReservation> getConcertReservations(ConcertReservationQuery.SearchList query) {
+        return jpaRepository.findAllByUserId(query.userId());
     }
 
-    @Transactional
     @Override
-    public void updateConcertReservation(ConcertReservationCommand.Update command) {
-        jpaRepository.findById(command.concertReservationId())
-                     .ifPresent(entity -> entity.updateConcertReservationState(command.status()));
+    public void deleteAll() {
+        jpaRepository.deleteAll();
     }
 }

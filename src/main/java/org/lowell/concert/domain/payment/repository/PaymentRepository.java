@@ -1,9 +1,12 @@
 package org.lowell.concert.domain.payment.repository;
 
 import org.lowell.concert.domain.payment.dto.PaymentCommand;
-import org.lowell.concert.domain.payment.model.PaymentInfo;
+import org.lowell.concert.domain.payment.model.Payment;
+
+import java.util.Optional;
 
 public interface PaymentRepository {
-    void createPayment(PaymentCommand.Create command);
-    PaymentInfo getPayment(Long paymentId);
+    Payment createPayment(PaymentCommand.Create command);
+    Optional<Payment> getPayment(Long paymentId);
+    void deleteAll();
 }

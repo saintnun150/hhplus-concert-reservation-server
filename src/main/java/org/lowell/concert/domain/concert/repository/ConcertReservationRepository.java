@@ -2,14 +2,14 @@ package org.lowell.concert.domain.concert.repository;
 
 import org.lowell.concert.domain.concert.dto.ConcertReservationCommand;
 import org.lowell.concert.domain.concert.dto.ConcertReservationQuery;
-import org.lowell.concert.domain.concert.model.ConcertReservationInfo;
+import org.lowell.concert.domain.concert.model.ConcertReservation;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ConcertReservationRepository {
-    void createConcertReservation(ConcertReservationCommand.Create command);
-    ConcertReservationInfo getConcertReservation(ConcertReservationQuery.Search query);
-    List<ConcertReservationInfo> getConcertReservations(ConcertReservationQuery.SearchList query);
-    void updateConcertReservation(ConcertReservationCommand.Update command);
-
+    ConcertReservation createConcertReservation(ConcertReservationCommand.Create command);
+    Optional<ConcertReservation> getConcertReservation(ConcertReservationQuery.Search query);
+    List<ConcertReservation> getConcertReservations(ConcertReservationQuery.SearchList query);
+    void deleteAll();
 }
