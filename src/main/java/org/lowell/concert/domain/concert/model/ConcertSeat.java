@@ -71,19 +71,30 @@ public class ConcertSeat {
     }
 
     public void checkTemporaryReservedExpired(LocalDateTime now, int tempReservedMinutes) {
-        if (tempReservedAt != null && tempReservedAt.plusMinutes(tempReservedMinutes).isBefore(now)) {
-            throw DomainException.create(ConcertSeatError.RESERVED_EXPIRED,
-                                         DomainException.createPayload(now, tempReservedMinutes));
+        if (tempReservedAt != null) {
+            LocalDateTime expirationTime = tempReservedAt.plusMinutes(tempReservedMinutes);
+            if (expirationTime.isBefore(now)) {
+                throw DomainException.create(ConcertSeatError.RESERVED_EXPIRED,
+                                             DomainException.createPayload(now, tempReservedMinutes));
+            }
         }
     }
 
-//    public void isTemporaryReserved(LocalDateTime now, int tempReservedMinutes) {
-//        if (tempReservedAt != null && tempReservedAt.plusMinutes(tempReservedMinutes).isAfter(now)) {
-//            throw DomainException(ConcertSeatError.RESERVED_TEMPORARY, DomainException.createPayload(now, tempReservedMinutes));
-//        }
-//    }
+    public void checkTemporaryReserved(LocalDateTime now, int tempReservedMinutes) {
+        if (tempReservedAt != null) {
+            LocalDateTime expirationTime = tempReservedAt.plusMinutes(tempReservedMinutes);
+            if (expirationTime.isAfter(now)) {
+                throw DomainException.create(ConcertSeatError.RESERVED_TEMPORARY);
+            }
+        }
+    }
 
-    public void checkAvailableSeat(LocalDateTime now, int tempReservedMinutes) {
+    public void checkReservableSeat(LocalDateTime now, int tempReservedMinutes) {
+        isCompletedReserved();
+        checkTemporaryReserved(now, tempReservedMinutes);
+    }
+
+    public void checkPayableSeat(LocalDateTime now, int tempReservedMinutes) {
         isCompletedReserved();
         checkTemporaryReservedExpired(now, tempReservedMinutes);
     }

@@ -146,12 +146,16 @@ public class PaymentFacadeTest {
     @Test
     void throwException_WhenUserAccountIsNotEnough() {
         // given
-        Long seatId = 1L;
-        Long userId = 1L;
         Long concertScheduleId = 1L;
         int price = 10000;
         long balance = 5000;
-        Long reservationId = 1L;
+        User user = userJpaRepository.save(User.builder()
+                                               .username("name")
+                                               .build());
+        UserAccount account = userAccountJpaRepository.save(UserAccount.builder()
+                                                                       .userId(user.getUserId())
+                                                                       .balance(balance)
+                                                                       .build());
         ConcertSeat seat = concertSeatJpaRepository.save(ConcertSeat.builder()
                                                                     .seatNo(1)
                                                                     .concertScheduleId(concertScheduleId)
@@ -160,18 +164,11 @@ public class PaymentFacadeTest {
                                                                     .tempReservedAt(LocalDateTime.now().minusMinutes(3))
                                                                     .build());
         ConcertReservation saved = concertReservationJpaRepository.save(ConcertReservation.builder()
-                                                                                          .userId(userId)
+                                                                                          .userId(user.getUserId())
                                                                                           .seatId(seat.getSeatId())
                                                                                           .status(ReservationStatus.PENDING)
                                                                                           .build());
-        userJpaRepository.save(User.builder()
-                                   .userId(userId)
-                                   .username("name")
-                                   .build());
-        userAccountJpaRepository.save(UserAccount.builder()
-                                                 .userId(userId)
-                                                 .balance(balance)
-                                                 .build());
+
 
         assertThatThrownBy(() -> paymentFacade.payment(saved.getReservationId(), "token"))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {

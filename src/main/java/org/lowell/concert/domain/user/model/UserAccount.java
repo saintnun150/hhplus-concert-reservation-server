@@ -24,7 +24,7 @@ public class UserAccount {
     private Long userId;
 
     @Column(name = "balance")
-    private Long balance;
+    private long balance = 0L;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

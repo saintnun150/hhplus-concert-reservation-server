@@ -25,6 +25,7 @@ public class WaitingQueue {
     private String token;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private TokenStatus tokenStatus;
 
     @Column(name = "created_at")

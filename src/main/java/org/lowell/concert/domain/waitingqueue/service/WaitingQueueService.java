@@ -1,7 +1,9 @@
 package org.lowell.concert.domain.waitingqueue.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.lowell.concert.domain.common.exception.DomainException;
+import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WaitingQueueService {
@@ -54,7 +57,7 @@ public class WaitingQueueService {
         return queueRepository.getWaitingQueues(query);
     }
 
-    public int getActivatableQueueCount() {
+    public int countReadyToActivateQueues() {
         Long activateQueueCount = queueRepository.getActivateQueueCount(TokenStatus.ACTIVATE);
         if (activateQueueCount == null || activateQueueCount == 0) {
             return ACTIVATE_CAPACITY;
@@ -62,17 +65,29 @@ public class WaitingQueueService {
         return ACTIVATE_CAPACITY - activateQueueCount.intValue();
     }
 
-    public void updateWaitingQueues(WaitingQueueCommand.UpdateBatch command) {
-        int activatableQueueCount = getActivatableQueueCount();
-        List<WaitingQueue> waitingQueues = getWaitingQueueByStatus(new WaitingQueueQuery.GetQueues(TokenStatus.WAITING, activatableQueueCount));
+    public void activateReadyWaitingQueues(WaitingQueueCommand.UpdateBatch command) {
+        int count = countReadyToActivateQueues();
+        if (count == 0) {
+            log.info("## No capacity to activate waiting queues");
+            return;
+        }
+        List<WaitingQueue> waitingQueues = getWaitingQueueByStatus(new WaitingQueueQuery.GetQueues(TokenStatus.WAITING,count));
+        if (waitingQueues.isEmpty()) {
+            log.info("## No waiting queues to activate");
+            return;
+        }
         List<Long> tokenIds = waitingQueues.stream()
                                            .map(WaitingQueue::getTokenId)
                                            .toList();
-        command = new WaitingQueueCommand.UpdateBatch(tokenIds, TokenStatus.ACTIVATE, command.updatedAt(), command.expiresAt());
+        command = new WaitingQueueCommand.UpdateBatch(tokenIds,
+                                                      TokenStatus.ACTIVATE,
+                                                      command.updatedAt(),
+                                                      command.expiresAt());
         queueRepository.updateAll(command);
     }
 
-    public void deleteAll() {
-        queueRepository.deleteAll();
+    public void checkWaitingQueueActivate(WaitingQueueQuery.CheckQueueActivation query) {
+        WaitingQueue waitingQueue = getWaitingQueue(new WaitingQueueQuery.GetQueue(query.token()));
+        waitingQueue.validateTokenExpiredDate(query.now(), ConcertPolicy.EXPIRED_QUEUE_MINUTES);
     }
 }
