@@ -1,8 +1,9 @@
-package org.lowell.concert.application.payment;
+package org.lowell.concert.application.payment.integration;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.lowell.concert.application.payment.PaymentFacade;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.concert.exception.ConcertReservationError;
 import org.lowell.concert.domain.concert.exception.ConcertSeatError;
