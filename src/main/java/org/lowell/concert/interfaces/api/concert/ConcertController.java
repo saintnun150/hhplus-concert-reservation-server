@@ -1,6 +1,9 @@
 package org.lowell.concert.interfaces.api.concert;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
+import org.lowell.concert.application.concert.ConcertFacade;
+import org.lowell.concert.application.concert.ConcertInfo;
 import org.lowell.concert.interfaces.api.common.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +13,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/concerts")
+@RequiredArgsConstructor
 public class ConcertController implements ConcertApiDocs {
+    private final ConcertFacade concertFacade;
 
     @SecurityRequirement(name = "queueToken")
     @GetMapping
@@ -23,44 +28,54 @@ public class ConcertController implements ConcertApiDocs {
     }
 
     @SecurityRequirement(name = "queueToken")
-    @GetMapping("/{concertId}/dates")
-    public ApiResponse<List<ConcertResponse.DateInfo>> getConcertDates(@PathVariable Long concertId,
-                                                                       ConcertRequest.SearchDate request,
-                                                                       @RequestHeader("X-QUEUE-TOKEN") String token) {
-        return ApiResponse.createOk(List.of(ConcertResponse.DateInfo.builder()
-                                                                    .concertDateId(1L)
-                                                                    .concertDate(LocalDateTime.now())
-                                                                    .startTime(LocalDateTime.now().plusHours(1L))
-                                                                    .endTime(LocalDateTime.now().plusHours(2L))
-                                                                    .build()));
+    @GetMapping("/{concertId}/schedules")
+    public ApiResponse<List<ConcertResponse.ScheduleInfo>> getSchedules(@PathVariable Long concertId,
+                                                                        ConcertRequest.SearchDate request,
+                                                                        @RequestHeader("X-QUEUE-TOKEN") String token) {
+        List<ConcertInfo.ScheduleInfo> schedules = concertFacade.getConcertSchedule(concertId, LocalDateTime.now());
+        List<ConcertResponse.ScheduleInfo> response = schedules.stream()
+                                                               .map(schedule -> ConcertResponse.ScheduleInfo.builder()
+                                                                                                            .scheduleId(schedule.getScheduleId())
+                                                                                                            .scheduleDate(schedule.getScheduleDate())
+                                                                                                            .startTime(schedule.getBeginTime())
+                                                                                                            .endTime(schedule.getEndTime())
+                                                                                                            .build())
+                                                               .toList();
+        return ApiResponse.createOk(response);
     }
 
     @SecurityRequirement(name = "queueToken")
-    @GetMapping("/{concertId}/dates/{concertDateId}/seats")
-    public ApiResponse<List<ConcertResponse.SeatInfo>> getConcertDates(@PathVariable Long concertId,
-                                                                       @PathVariable Long concertDateId,
-                                                                       @RequestHeader("X-QUEUE-TOKEN") String token) {
-        return ApiResponse.createOk(List.of(ConcertResponse.SeatInfo.builder()
-                                                                    .seatId(1L)
-                                                                    .seatNo(5L)
-                                                                    .price(50_000L)
-                                                                    .build(),
-                                            ConcertResponse.SeatInfo.builder()
-                                                                    .seatId(2L)
-                                                                    .seatNo(3L)
-                                                                    .price(30_000L)
-                                                                    .build()));
+    @GetMapping("/{concertId}/schedules/{scheduleId}/seats")
+    public ApiResponse<List<ConcertResponse.SeatInfo>> getSeats(@PathVariable Long concertId,
+                                                                @PathVariable Long scheduleId,
+                                                                @RequestHeader("X-QUEUE-TOKEN") String token) {
+        List<ConcertInfo.SeatInfo> concertSeats = concertFacade.getAvailableConcertSeats(scheduleId, LocalDateTime.now());
+        List<ConcertResponse.SeatInfo> response = concertSeats.stream()
+                                                              .map(seat -> ConcertResponse.SeatInfo.builder()
+                                                                                                   .seatId(seat.getSeatId())
+                                                                                                   .seatNo(seat.getSeatNo())
+                                                                                                   .price(seat.getPrice())
+                                                                                                   .build())
+                                                              .toList();
+        return ApiResponse.createOk(response);
     }
 
     @SecurityRequirement(name = "queueToken")
-    @PostMapping("/{concertId}/dates/{concertDateId}/reservations")
+    @PostMapping("/{concertId}/schedules/{scheduleId}/reservations")
     public ApiResponse<ConcertResponse.ReservationInfo> createConcertReservation(@PathVariable Long concertId,
-                                                                                 @PathVariable Long concertDateId,
+                                                                                 @PathVariable Long scheduleId,
                                                                                  ConcertRequest.Reservation request,
                                                                                  @RequestHeader("X-QUEUE-TOKEN") String token) {
-        return ApiResponse.createOk(ConcertResponse.ReservationInfo.builder()
-                                                                   .concertReservationId(10L)
-                                                                   .build());
+
+        ConcertInfo.ReservationInfo reservationInfo = concertFacade.reserveConcertSeat(request.getSeatId(), request.getUserId());
+        ConcertResponse.ReservationInfo response = ConcertResponse.ReservationInfo.builder()
+                                                                                  .reservationId(reservationInfo.getReservationId())
+                                                                                  .seatNo(reservationInfo.getSeatNo())
+                                                                                  .userId(reservationInfo.getUserId())
+                                                                                  .status(reservationInfo.getStatus())
+                                                                                  .createdAt(reservationInfo.getCreatedAt())
+                                                                                  .build();
+        return ApiResponse.createOk(response);
     }
 
 

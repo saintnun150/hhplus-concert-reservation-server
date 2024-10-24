@@ -15,7 +15,7 @@ public class ConcertSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "concert_schedule_id")
+    @Column(name = "schedule_id")
     private Long scheduleId;
 
     @Column(name = "concert_id")

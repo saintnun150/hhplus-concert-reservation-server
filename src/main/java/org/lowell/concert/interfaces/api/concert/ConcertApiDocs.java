@@ -15,18 +15,18 @@ public interface ConcertApiDocs {
     ApiResponse<List<ConcertResponse.Info>> getConcerts(@Parameter(hidden = true) String token);
 
     @Operation(summary = "예약 가능한 콘서트 날짜 조회", description = "예약 가능한 콘서트 날짜 목록을 반환한다.")
-    ApiResponse<List<ConcertResponse.DateInfo>> getConcertDates(@PathVariable Long concertId,
-                                                                ConcertRequest.SearchDate request,
-                                                                @Parameter(hidden = true) String token);
+    ApiResponse<List<ConcertResponse.ScheduleInfo>> getSchedules(@PathVariable Long concertId,
+                                                                    ConcertRequest.SearchDate request,
+                                                                    @Parameter(hidden = true) String token);
 
     @Operation(summary = "예약 가능한 좌석 조회", description = "예약 가능한 좌석 목록을 반환한다.")
-    ApiResponse<List<ConcertResponse.SeatInfo>> getConcertDates(@PathVariable Long concertId,
-                                                                @PathVariable Long concertDateId,
+    ApiResponse<List<ConcertResponse.SeatInfo>> getSeats(@PathVariable Long concertId,
+                                                                @PathVariable Long scheduleId,
                                                                 @Parameter(hidden = true) String token);
 
     @Operation(summary = "좌석 예약", description = "콘서트 날짜 Id와 좌석 정보를 통해 좌석을 예약 후 예약 정보를 반환한다.")
     ApiResponse<ConcertResponse.ReservationInfo> createConcertReservation(@PathVariable Long concertId,
-                                                                          @PathVariable Long concertDateId,
+                                                                          @PathVariable Long scheduleId,
                                                                           ConcertRequest.Reservation request,
                                                                           @Parameter(hidden = true) String token);
 

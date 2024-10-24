@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface UserApiDocs {
 
     @Operation(summary = "계좌 정보 조회", description = "사용자 ID를 통해 해당 계좌 정보를 조회한다.")
-    ApiResponse<UserResponse.Info> getUserAccount(@PathVariable String userId);
+    ApiResponse<UserResponse.Info> getUserAccount(@PathVariable Long userId);
 
     @Operation(summary = "계좌 잔액 충전 ", description = "사용자 ID를 통해 해당 계좌에 잔액을 충전한다.")
-    ApiResponse<UserResponse.Info> chargeUserAccount(@PathVariable String userId,
-                                                                UserRequest.ChargeAccount request);
+    ApiResponse<UserResponse.Info> chargeUserAccount(@PathVariable Long userId,
+                                                     UserRequest.ChargeAccount request);
 }

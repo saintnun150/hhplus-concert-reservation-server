@@ -3,6 +3,7 @@ package org.lowell.concert.interfaces.api.concert;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.lowell.concert.infra.db.payment.repository.PaymentRepositoryImpl;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
@@ -24,7 +25,7 @@ public class ConcertRequest {
     @AllArgsConstructor
     public static class SearchSeat {
         @Schema(description = "콘서트 날짜 ID")
-        private Long concertDateId;
+        private Long concertScheduleId;
     }
 
     @Getter
@@ -32,5 +33,7 @@ public class ConcertRequest {
     public static class Reservation {
         @Schema(description = "좌석 ID")
         private Long seatId;
+        @Schema(description = "예약자 id")
+        private Long userId;
     }
 }
