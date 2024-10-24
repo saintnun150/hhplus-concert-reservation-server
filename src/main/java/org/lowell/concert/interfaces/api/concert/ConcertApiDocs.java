@@ -3,7 +3,7 @@ package org.lowell.concert.interfaces.api.concert;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.lowell.concert.interfaces.api.common.ApiResponse;
+import org.lowell.concert.interfaces.api.common.support.ApiResponse;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
