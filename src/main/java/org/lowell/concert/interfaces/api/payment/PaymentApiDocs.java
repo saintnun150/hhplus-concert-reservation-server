@@ -3,7 +3,7 @@ package org.lowell.concert.interfaces.api.payment;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.lowell.concert.interfaces.api.common.ApiResponse;
+import org.lowell.concert.interfaces.api.common.support.ApiResponse;
 
 @Tag(name = "결제 API", description = "결제 관련 API")
 public interface PaymentApiDocs {

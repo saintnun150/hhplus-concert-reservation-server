@@ -3,7 +3,7 @@ package org.lowell.concert.interfaces.api.user;
 import lombok.RequiredArgsConstructor;
 import org.lowell.concert.application.user.UserFacade;
 import org.lowell.concert.application.user.UserInfo;
-import org.lowell.concert.interfaces.api.common.ApiResponse;
+import org.lowell.concert.interfaces.api.common.support.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

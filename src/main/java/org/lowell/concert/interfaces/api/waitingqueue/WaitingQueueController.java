@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.lowell.concert.application.waitingqueue.WaitingQueueFacade;
 import org.lowell.concert.application.waitingqueue.WaitingQueueInfo;
-import org.lowell.concert.interfaces.api.common.ApiResponse;
+import org.lowell.concert.interfaces.api.common.support.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/v1/waiting-queues")

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.lowell.concert.application.concert.ConcertFacade;
 import org.lowell.concert.application.concert.ConcertInfo;
-import org.lowell.concert.interfaces.api.common.ApiResponse;
+import org.lowell.concert.interfaces.api.common.support.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;

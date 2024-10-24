@@ -5,7 +5,7 @@ import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.concert.dto.ConcertSeatCommand;
 import org.lowell.concert.domain.concert.dto.ConcertSeatQuery;
-import org.lowell.concert.domain.concert.exception.ConcertSeatErrorCode;
+import org.lowell.concert.domain.concert.exception.ConcertSeatError;
 import org.lowell.concert.domain.concert.model.ConcertSeat;
 import org.lowell.concert.domain.concert.repository.ConcertSeatRepository;
 import org.springframework.stereotype.Service;
@@ -26,18 +26,18 @@ public class ConcertSeatService {
 
     public ConcertSeat getConcertSeat(ConcertSeatQuery.Search query) {
         return concertSeatRepository.getConcertSeat(query)
-                                    .orElseThrow(()-> DomainException.create(ConcertSeatErrorCode.NOT_FOUND_SEAT));
+                                    .orElseThrow(()-> DomainException.create(ConcertSeatError.NOT_FOUND_SEAT, DomainException.createPayload(query)));
     }
 
     public ConcertSeat getConcertSeatWithLock(ConcertSeatQuery.Search query) {
         return concertSeatRepository.getConcertSeatWithLock(query)
-                                    .orElseThrow(()-> DomainException.create(ConcertSeatErrorCode.NOT_FOUND_SEAT));
+                                    .orElseThrow(()-> DomainException.create(ConcertSeatError.NOT_FOUND_SEAT, DomainException.createPayload(query)));
     }
 
     public List<ConcertSeat> getConcertSeats(ConcertSeatQuery.SearchList query) {
         List<ConcertSeat> concertSeats = concertSeatRepository.getConcertSeats(query);
         if (CollectionUtils.isEmpty(concertSeats)) {
-            throw new DomainException(ConcertSeatErrorCode.NOT_FOUND_SEAT);
+            throw DomainException.create(ConcertSeatError.NOT_FOUND_SEAT, DomainException.createPayload(query));
         }
         return concertSeats;
     }
@@ -47,14 +47,9 @@ public class ConcertSeatService {
                                                                .filter(seat -> seat.isEmpty() || seat.isTemporaryReserved(query.now(), ConcertPolicy.TEMP_RESERVED_SEAT_MINUTES))
                                                                .toList();
         if (CollectionUtils.isEmpty(concertSeats)) {
-            throw new DomainException(ConcertSeatErrorCode.NOT_FOUND_AVAILABLE_SEAT);
+            throw DomainException.create(ConcertSeatError.NOT_FOUND_AVAILABLE_SEAT, DomainException.createPayload(query));
         }
         return concertSeats;
     }
-
-    public void deleteAll() {
-        concertSeatRepository.deleteAll();
-    }
-
 
 }

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.concert.dto.ConcertScheduleCommand;
 import org.lowell.concert.domain.concert.dto.ConcertScheduleQuery;
-import org.lowell.concert.domain.concert.exception.ConcertScheduleErrorCode;
+import org.lowell.concert.domain.concert.exception.ConcertScheduleError;
 import org.lowell.concert.domain.concert.model.ConcertSchedule;
 import org.lowell.concert.domain.concert.repository.ConcertScheduleRepository;
 import org.springframework.stereotype.Service;
@@ -20,17 +20,17 @@ public class ConcertScheduleService {
     @Transactional
     public void createConcertSchedule(ConcertScheduleCommand.Create command) {
         if (command.concertId() == null) {
-            throw new DomainException(ConcertScheduleErrorCode.INVALID_CONCERT_ID);
+            throw DomainException.create(ConcertScheduleError.INVALID_CONCERT_ID, DomainException.createPayload(command));
         }
         if (command.scheduleDate() == null) {
-            throw new DomainException(ConcertScheduleErrorCode.INVALID_SCHEDULE_DATE);
+            throw DomainException.create(ConcertScheduleError.INVALID_SCHEDULE_DATE, DomainException.createPayload(command));
         }
         concertScheduleRepository.createConcertDate(command);
     }
 
     public ConcertSchedule getConcertSchedule(long concertScheduleId) {
         ConcertSchedule schedule = concertScheduleRepository.getConcertSchedule(concertScheduleId)
-                                                            .orElseThrow(() -> new DomainException(ConcertScheduleErrorCode.NOT_FOUND_CONCERT_SCHEDULE));
+                                                            .orElseThrow(() -> DomainException.create(ConcertScheduleError.NOT_FOUND_CONCERT_SCHEDULE, DomainException.createPayload(concertScheduleId)));
         return schedule;
     }
 
@@ -49,7 +49,7 @@ public class ConcertScheduleService {
         }
 
         if (concertDates == null) {
-            throw new DomainException(ConcertScheduleErrorCode.NOT_FOUND_CONCERT_SCHEDULE);
+            throw DomainException.create(ConcertScheduleError.NOT_FOUND_CONCERT_SCHEDULE, DomainException.createPayload(query));
         }
         return concertDates;
     }

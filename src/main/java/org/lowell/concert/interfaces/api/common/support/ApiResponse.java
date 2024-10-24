@@ -1,4 +1,4 @@
-package org.lowell.concert.interfaces.api.common;
+package org.lowell.concert.interfaces.api.common.support;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

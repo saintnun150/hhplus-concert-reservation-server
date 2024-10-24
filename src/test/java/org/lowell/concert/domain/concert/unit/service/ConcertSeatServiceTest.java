@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.concert.dto.ConcertSeatQuery;
-import org.lowell.concert.domain.concert.exception.ConcertSeatErrorCode;
+import org.lowell.concert.domain.concert.exception.ConcertSeatError;
 import org.lowell.concert.domain.concert.model.ConcertSeat;
 import org.lowell.concert.domain.concert.model.SeatStatus;
 import org.lowell.concert.domain.concert.repository.ConcertSeatRepository;
@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,12 +35,13 @@ class ConcertSeatServiceTest {
     @Test
     void throwException_when_empty_concert_seats() {
         long concertDateId = 1L;
-        ConcertSeatQuery.SearchList query = new ConcertSeatQuery.SearchList(concertDateId);
+        LocalDateTime now = LocalDateTime.now();
+        ConcertSeatQuery.SearchList query = new ConcertSeatQuery.SearchList(concertDateId, now);
         when(concertSeatRepository.getConcertSeats(query)).thenReturn(null);
 
         assertThatThrownBy(() -> concertSeatService.getConcertSeats(query))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertSeatErrorCode.NOT_FOUND_SEAT);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertSeatError.NOT_FOUND_SEAT);
                 });
     }
 
@@ -47,12 +49,13 @@ class ConcertSeatServiceTest {
     @Test
     void throwException_when_search_concert_seats_not_found() {
         long concertDateId = 1L;
-        ConcertSeatQuery.SearchList query = new ConcertSeatQuery.SearchList(concertDateId);
+        LocalDateTime now = LocalDateTime.now();
+        ConcertSeatQuery.SearchList query = new ConcertSeatQuery.SearchList(concertDateId, now);
         when(concertSeatRepository.getConcertSeats(query)).thenReturn(null);
 
         assertThatThrownBy(() -> concertSeatService.getConcertSeats(query))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertSeatErrorCode.NOT_FOUND_SEAT);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertSeatError.NOT_FOUND_SEAT);
                 });
     }
 
@@ -60,6 +63,7 @@ class ConcertSeatServiceTest {
     @Test
     void checkEmptySeat() {
         long concertDateId = 1L;
+        LocalDateTime now = LocalDateTime.now();
         ConcertSeat concertSeat = ConcertSeat.builder()
                                              .seatId(1L)
                                              .concertScheduleId(concertDateId)
@@ -92,10 +96,11 @@ class ConcertSeatServiceTest {
 
         List<ConcertSeat> seats = List.of(concertSeat, concertSeat2, concertSeat3);
 
-        when(concertSeatRepository.getConcertSeats(new ConcertSeatQuery.SearchList(concertDateId)))
+
+        when(concertSeatRepository.getConcertSeats(new ConcertSeatQuery.SearchList(concertDateId, now)))
                 .thenReturn(seats);
 
-        List<ConcertSeat> availableSeats = concertSeatService.getAvailableSeats(new ConcertSeatQuery.SearchList(concertDateId));
+        List<ConcertSeat> availableSeats = concertSeatService.getAvailableSeats(new ConcertSeatQuery.SearchList(concertDateId, now));
 
         assertThat(availableSeats).hasSize(2);
         assertThat(availableSeats).contains(concertSeat, concertSeat2);
@@ -106,6 +111,7 @@ class ConcertSeatServiceTest {
     @Test
     void throwException_when_empty_available_seats() {
         long concertDateId = 1L;
+        LocalDateTime now = LocalDateTime.now();
         ConcertSeat concertSeat = ConcertSeat.builder()
                                              .seatId(1L)
                                              .concertScheduleId(concertDateId)
@@ -138,12 +144,12 @@ class ConcertSeatServiceTest {
 
         List<ConcertSeat> seats = List.of(concertSeat, concertSeat2, concertSeat3);
 
-        when(concertSeatRepository.getConcertSeats(new ConcertSeatQuery.SearchList(concertDateId)))
+        when(concertSeatRepository.getConcertSeats(new ConcertSeatQuery.SearchList(concertDateId,now)))
                 .thenReturn(seats);
 
-        assertThatThrownBy(() -> concertSeatService.getAvailableSeats(new ConcertSeatQuery.SearchList(concertDateId)))
+        assertThatThrownBy(() -> concertSeatService.getAvailableSeats(new ConcertSeatQuery.SearchList(concertDateId, now)))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertSeatErrorCode.NOT_FOUND_AVAILABLE_SEAT);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertSeatError.NOT_FOUND_AVAILABLE_SEAT);
                 });
 
 

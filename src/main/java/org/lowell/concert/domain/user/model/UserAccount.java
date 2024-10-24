@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.lowell.concert.domain.common.exception.DomainException;
-import org.lowell.concert.domain.user.exception.UserAccountErrorCode;
+import org.lowell.concert.domain.user.exception.UserAccountError;
 
 import java.time.LocalDateTime;
 
@@ -41,7 +41,7 @@ public class UserAccount {
 
     public void chargeBalance(Long balance) {
         if (balance <= 0) {
-            throw new DomainException(UserAccountErrorCode.INVALID_AMOUNT);
+            throw DomainException.create(UserAccountError.INVALID_AMOUNT);
         }
         this.balance += balance;
         this.updatedAt = LocalDateTime.now();
@@ -49,11 +49,11 @@ public class UserAccount {
 
     public void useBalance(Long balance) {
         if (balance <= 0) {
-            throw new DomainException(UserAccountErrorCode.INVALID_AMOUNT);
+            throw DomainException.create(UserAccountError.INVALID_AMOUNT);
         }
 
         if (this.balance < balance) {
-            throw new DomainException(UserAccountErrorCode.EXCEED_BALANCE);
+            throw DomainException.create(UserAccountError.EXCEED_BALANCE);
         }
         this.balance -= balance;
         this.updatedAt = LocalDateTime.now();

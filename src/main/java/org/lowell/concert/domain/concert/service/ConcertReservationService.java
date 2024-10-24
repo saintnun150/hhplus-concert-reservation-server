@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.concert.dto.ConcertReservationCommand;
 import org.lowell.concert.domain.concert.dto.ConcertReservationQuery;
-import org.lowell.concert.domain.concert.exception.ConcertReservationErrorCode;
+import org.lowell.concert.domain.concert.exception.ConcertReservationError;
 import org.lowell.concert.domain.concert.model.ConcertReservation;
 import org.lowell.concert.domain.concert.repository.ConcertReservationRepository;
 import org.springframework.stereotype.Service;
@@ -25,19 +25,15 @@ public class ConcertReservationService {
 
     public ConcertReservation getConcertReservation(ConcertReservationQuery.Search query) {
         return concertReservationRepository.getConcertReservation(query)
-                                           .orElseThrow(() -> new DomainException(ConcertReservationErrorCode.NOT_FOUND_RESERVATION));
+                                           .orElseThrow(() -> DomainException.create(ConcertReservationError.NOT_FOUND_RESERVATION, DomainException.createPayload(query)));
     }
 
     public List<ConcertReservation> getConcertReservations(ConcertReservationQuery.SearchList query) {
         List<ConcertReservation> reservations = concertReservationRepository.getConcertReservations(query);
         if (CollectionUtils.isEmpty(reservations)) {
-            throw new DomainException(ConcertReservationErrorCode.NOT_FOUND_RESERVATION);
+            throw DomainException.create(ConcertReservationError.NOT_FOUND_RESERVATION, DomainException.createPayload(query));
         }
         return reservations;
-    }
-
-    public void deleteAll() {
-        concertReservationRepository.deleteAll();
     }
 
 }

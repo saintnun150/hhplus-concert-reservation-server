@@ -3,7 +3,7 @@ package org.lowell.concert.interfaces.api.waitingqueue;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.lowell.concert.interfaces.api.common.ApiResponse;
+import org.lowell.concert.interfaces.api.common.support.ApiResponse;
 
 @Tag(name = "대기열 토큰 API", description = "대기열 토큰 관련 API")
 public interface WaitingQueueApiDocs {

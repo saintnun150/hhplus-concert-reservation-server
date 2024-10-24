@@ -1,11 +1,10 @@
 package org.lowell.concert.application.user;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.domain.common.exception.DomainException;
-import org.lowell.concert.domain.user.exception.UserAccountErrorCode;
+import org.lowell.concert.domain.user.exception.UserAccountError;
 import org.lowell.concert.domain.user.service.UserAccountService;
 import org.lowell.concert.domain.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +56,7 @@ public class UserFacadeIntegrationTest {
 
         assertThatThrownBy(() -> userFacade.chargeBalance(userId, 0L))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(UserAccountErrorCode.INVALID_AMOUNT);
+                    assertThat(ex.getDomainError()).isEqualTo(UserAccountError.INVALID_AMOUNT);
                 });
 
     }
