@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.lowell.concert.domain.common.exception.DomainException;
-import org.lowell.concert.domain.concert.exception.ConcertSeatErrorCode;
+import org.lowell.concert.domain.concert.exception.ConcertSeatError;
 
 import java.time.LocalDateTime;
 
@@ -66,19 +66,20 @@ public class ConcertSeat {
 
     public void isCompletedReserved() {
         if (reservedAt != null) {
-            throw new DomainException(ConcertSeatErrorCode.RESERVED_COMPLETE);
+            throw DomainException.create(ConcertSeatError.RESERVED_COMPLETE);
         }
     }
 
     public void checkTemporaryReservedExpired(LocalDateTime now, int tempReservedMinutes) {
         if (tempReservedAt != null && tempReservedAt.plusMinutes(tempReservedMinutes).isBefore(now)) {
-            throw new DomainException(ConcertSeatErrorCode.RESERVED_EXPIRED);
+            throw DomainException.create(ConcertSeatError.RESERVED_EXPIRED,
+                                         DomainException.createPayload(now, tempReservedMinutes));
         }
     }
 
 //    public void isTemporaryReserved(LocalDateTime now, int tempReservedMinutes) {
 //        if (tempReservedAt != null && tempReservedAt.plusMinutes(tempReservedMinutes).isAfter(now)) {
-//            throw new DomainException(ConcertSeatErrorCode.RESERVED_TEMPORARY);
+//            throw DomainException(ConcertSeatError.RESERVED_TEMPORARY, DomainException.createPayload(now, tempReservedMinutes));
 //        }
 //    }
 
