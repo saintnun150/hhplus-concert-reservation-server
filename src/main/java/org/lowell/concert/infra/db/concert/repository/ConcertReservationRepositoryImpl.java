@@ -34,6 +34,11 @@ public class ConcertReservationRepositoryImpl implements ConcertReservationRepos
     }
 
     @Override
+    public Optional<ConcertReservation> getConcertReservationWithLock(ConcertReservationQuery.Search query) {
+        return jpaRepository.findByIdWithLock(query.concertReservationId());
+    }
+
+    @Override
     public List<ConcertReservation> getConcertReservations(ConcertReservationQuery.SearchList query) {
         return jpaRepository.findAllByUserId(query.userId());
     }

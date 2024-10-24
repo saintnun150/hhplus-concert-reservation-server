@@ -28,6 +28,11 @@ public class ConcertReservationService {
                                            .orElseThrow(() -> DomainException.create(ConcertReservationError.NOT_FOUND_RESERVATION, DomainException.createPayload(query)));
     }
 
+    public ConcertReservation getConcertReservationWithLock(ConcertReservationQuery.Search query) {
+        return concertReservationRepository.getConcertReservationWithLock(query)
+                                           .orElseThrow(() -> DomainException.create(ConcertReservationError.NOT_FOUND_RESERVATION, DomainException.createPayload(query)));
+    }
+
     public List<ConcertReservation> getConcertReservations(ConcertReservationQuery.SearchList query) {
         List<ConcertReservation> reservations = concertReservationRepository.getConcertReservations(query);
         if (CollectionUtils.isEmpty(reservations)) {
