@@ -1,5 +1,6 @@
 package org.lowell.concert.application.concert.integration;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,12 @@ public class ConcertReservationConcurrencyTest {
 
     @BeforeEach
     void setUp() {
+        userJpaRepository.deleteAll();
+        concertSeatJpaRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
         userJpaRepository.deleteAll();
         concertSeatJpaRepository.deleteAll();
     }

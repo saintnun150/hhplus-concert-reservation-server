@@ -181,10 +181,16 @@ public class PaymentFacadeTest {
     @Test
     void throwException_WhenTokenIsExpired() {
         // given
-        Long userId = 1L;
         Long concertScheduleId = 1L;
         int price = 10000;
         long balance = 20000;
+        User user = userJpaRepository.save(User.builder()
+                                               .username("name")
+                                               .build());
+        userAccountJpaRepository.save(UserAccount.builder()
+                                                 .userId(user.getUserId())
+                                                 .balance(balance)
+                                                 .build());
         ConcertSeat seat = concertSeatJpaRepository.save(ConcertSeat.builder()
                                                                     .seatNo(1)
                                                                     .concertScheduleId(concertScheduleId)
@@ -193,18 +199,11 @@ public class PaymentFacadeTest {
                                                                     .tempReservedAt(LocalDateTime.now().minusMinutes(3))
                                                                     .build());
         ConcertReservation saved = concertReservationJpaRepository.save(ConcertReservation.builder()
-                                                                                          .userId(userId)
+                                                                                          .userId(user.getUserId())
                                                                                           .seatId(seat.getSeatId())
                                                                                           .status(ReservationStatus.PENDING)
                                                                                           .build());
-        userJpaRepository.save(User.builder()
-                                   .userId(userId)
-                                   .username("name")
-                                   .build());
-        userAccountJpaRepository.save(UserAccount.builder()
-                                                 .userId(userId)
-                                                 .balance(balance)
-                                                 .build());
+
         waitingQueueTokenJpaRepository.save(WaitingQueue.builder()
                                                         .tokenId(1L)
                                                         .token("token")

@@ -1,6 +1,7 @@
 package org.lowell.concert.application.payment.integration;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.application.payment.PaymentFacade;
@@ -48,6 +49,17 @@ public class PaymentConcurrencyTest {
     private UserAccountJpaRepository userAccountJpaRepository;
     @Autowired
     private PaymentJpaRepository paymentJpaRepository;
+
+    @BeforeEach
+    public void setUp() {
+        paymentJpaRepository.deleteAll();
+        userJpaRepository.deleteAll();
+        userAccountJpaRepository.deleteAll();
+        concertSeatJpaRepository.deleteAll();
+        concertReservationJpaRepository.deleteAll();
+        waitingQueueTokenJpaRepository.deleteAll();
+        paymentJpaRepository.deleteAll();
+    }
 
     @AfterEach
     public void tearDown() {
