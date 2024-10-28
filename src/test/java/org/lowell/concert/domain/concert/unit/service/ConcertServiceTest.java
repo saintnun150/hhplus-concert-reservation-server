@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.concert.dto.ConcertCommand;
-import org.lowell.concert.domain.concert.exception.ConcertErrorCode;
+import org.lowell.concert.domain.concert.exception.ConcertError;
 import org.lowell.concert.domain.concert.repository.ConcertRepository;
 import org.lowell.concert.domain.concert.service.ConcertService;
 import org.mockito.InjectMocks;
@@ -34,7 +34,7 @@ class ConcertServiceTest {
         ConcertCommand.Create command = new ConcertCommand.Create(concertName);
         assertThatThrownBy(() -> concertService.createConcert(command))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertErrorCode.INVALID_CONCERT_NAME);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertError.INVALID_CONCERT_NAME);
                 });
     }
 
@@ -45,7 +45,7 @@ class ConcertServiceTest {
         when(concertRepository.getConcert(concertId)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> concertService.getConcert(concertId))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertErrorCode.NOT_FOUND_CONCERT);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertError.NOT_FOUND_CONCERT);
                 });
     }
 
@@ -55,7 +55,7 @@ class ConcertServiceTest {
         when(concertRepository.getConcerts()).thenReturn(null);
         assertThatThrownBy(() -> concertService.getConcerts())
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertErrorCode.NOT_FOUND_CONCERT);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertError.NOT_FOUND_CONCERT);
                 });
     }
 

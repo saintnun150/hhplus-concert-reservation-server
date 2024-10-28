@@ -1,7 +1,6 @@
 package org.lowell.concert.domain.user.integration;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.domain.common.exception.DomainException;
@@ -12,8 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.lowell.concert.domain.user.exception.UserAccountErrorCode.EXCEED_BALANCE;
-import static org.lowell.concert.domain.user.exception.UserAccountErrorCode.INVALID_AMOUNT;
+import static org.lowell.concert.domain.user.exception.UserAccountError.EXCEED_BALANCE;
+import static org.lowell.concert.domain.user.exception.UserAccountError.INVALID_AMOUNT;
 
 @SpringBootTest
 public class UserAccountIntegrationTest {
@@ -34,7 +33,7 @@ public class UserAccountIntegrationTest {
 
         assertThatThrownBy(() -> userAccount.chargeBalance(0L))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(INVALID_AMOUNT);
+                    assertThat(ex.getDomainError()).isEqualTo(INVALID_AMOUNT);
                 });
 
     }
@@ -47,7 +46,7 @@ public class UserAccountIntegrationTest {
 
         assertThatThrownBy(() -> userAccount.useBalance(0L))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(INVALID_AMOUNT);
+                    assertThat(ex.getDomainError()).isEqualTo(INVALID_AMOUNT);
                 });
     }
 
@@ -59,7 +58,7 @@ public class UserAccountIntegrationTest {
 
         assertThatThrownBy(() -> userAccount.useBalance(1000L))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(EXCEED_BALANCE);
+                    assertThat(ex.getDomainError()).isEqualTo(EXCEED_BALANCE);
                 });
     }
 

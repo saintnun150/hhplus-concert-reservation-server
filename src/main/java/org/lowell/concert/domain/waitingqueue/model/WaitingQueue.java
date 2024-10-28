@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.EnumUtils;
 import org.lowell.concert.domain.common.exception.DomainException;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueErrorCode;
+import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -25,6 +25,7 @@ public class WaitingQueue {
     private String token;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private TokenStatus tokenStatus;
 
     @Column(name = "created_at")
@@ -39,10 +40,10 @@ public class WaitingQueue {
     @Builder
     public WaitingQueue(Long tokenId, String token, TokenStatus tokenStatus, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime expiresAt) {
         if (!StringUtils.hasText(token)) {
-            throw DomainException.create(WaitingQueueErrorCode.INVALID_TOKEN_INPUT);
+            throw DomainException.create(WaitingQueueError.INVALID_TOKEN_INPUT);
         }
         if (tokenStatus == null || !EnumUtils.isValidEnum(TokenStatus.class, tokenStatus.name())) {
-            throw DomainException.create(WaitingQueueErrorCode.INVALID_TOKEN_STATUS_INPUT);
+            throw DomainException.create(WaitingQueueError.INVALID_TOKEN_STATUS_INPUT);
         }
 
         this.tokenId = tokenId;
@@ -58,20 +59,20 @@ public class WaitingQueue {
 
     public void validateWaitingStatus() {
         if (tokenStatus != TokenStatus.WAITING) {
-            throw DomainException.create(WaitingQueueErrorCode.NOT_WAITING_STATUS);
+            throw DomainException.create(WaitingQueueError.NOT_WAITING_STATUS);
         }
     }
 
     public void validateActivateStatus() {
         if (tokenStatus != TokenStatus.ACTIVATE) {
-            throw DomainException.create(WaitingQueueErrorCode.NOT_ACTIVATE_STATUS);
+            throw DomainException.create(WaitingQueueError.NOT_ACTIVATE_STATUS);
         }
     }
 
     public void validateTokenExpiredDate(LocalDateTime now, long timeToLive) {
         validateActivateStatus();
         if (expiresAt == null || now.isAfter(expiresAt.plusMinutes(timeToLive))) {
-            throw DomainException.create(WaitingQueueErrorCode.TOKEN_EXPIRED);
+            throw DomainException.create(WaitingQueueError.TOKEN_EXPIRED);
         }
     }
 

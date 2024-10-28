@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.lowell.concert.domain.common.exception.DomainException;
-import org.lowell.concert.domain.concert.exception.ConcertReservationErrorCode;
+import org.lowell.concert.domain.concert.exception.ConcertReservationError;
 
 import java.time.LocalDateTime;
 
@@ -65,10 +65,10 @@ public class ConcertReservation {
 
     public void isReservableStatus() {
         if (status == ReservationStatus.EXPIRED) {
-            throw new DomainException(ConcertReservationErrorCode.STATE_EXPIRED);
+            throw DomainException.create(ConcertReservationError.STATE_EXPIRED);
         }
         if (status == ReservationStatus.COMPLETED) {
-            throw new DomainException(ConcertReservationErrorCode.STATE_COMPLETE);
+            throw DomainException.create(ConcertReservationError.STATE_COMPLETE);
         }
     }
 }

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lowell.concert.domain.common.exception.DomainException;
-import org.lowell.concert.domain.user.exception.UserErrorCode;
+import org.lowell.concert.domain.user.exception.UserError;
 import org.lowell.concert.domain.user.repository.UserRepository;
 import org.lowell.concert.domain.user.service.UserService;
 import org.mockito.InjectMocks;
@@ -34,7 +34,7 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.getUser(userId))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(UserErrorCode.NOT_FOUND_USER);
+                    assertThat(ex.getDomainError()).isEqualTo(UserError.NOT_FOUND_USER);
                 });
     }
 }

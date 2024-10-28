@@ -3,7 +3,7 @@ package org.lowell.concert.domain.user.unit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.domain.common.exception.DomainException;
-import org.lowell.concert.domain.user.exception.UserAccountErrorCode;
+import org.lowell.concert.domain.user.exception.UserAccountError;
 import org.lowell.concert.domain.user.model.UserAccount;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +24,7 @@ public class UserAccountTest {
 
         assertThatThrownBy(() -> account.chargeBalance(amount))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(UserAccountErrorCode.INVALID_AMOUNT);
+                    assertThat(ex.getDomainError()).isEqualTo(UserAccountError.INVALID_AMOUNT);
                 });
 
     }
@@ -41,7 +41,7 @@ public class UserAccountTest {
 
         assertThatThrownBy(() -> account.useBalance(amount))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(UserAccountErrorCode.INVALID_AMOUNT);
+                    assertThat(ex.getDomainError()).isEqualTo(UserAccountError.INVALID_AMOUNT);
                 });
     }
 
@@ -57,7 +57,7 @@ public class UserAccountTest {
 
         assertThatThrownBy(() -> account.useBalance(amount))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(UserAccountErrorCode.EXCEED_BALANCE);
+                    assertThat(ex.getDomainError()).isEqualTo(UserAccountError.EXCEED_BALANCE);
                 });
 
     }

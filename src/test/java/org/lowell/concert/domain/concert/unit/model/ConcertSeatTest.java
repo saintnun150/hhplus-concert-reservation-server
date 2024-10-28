@@ -3,7 +3,7 @@ package org.lowell.concert.domain.concert.unit.model;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.domain.common.exception.DomainException;
-import org.lowell.concert.domain.concert.exception.ConcertSeatErrorCode;
+import org.lowell.concert.domain.concert.exception.ConcertSeatError;
 import org.lowell.concert.domain.concert.model.ConcertSeat;
 import org.lowell.concert.domain.concert.model.SeatStatus;
 
@@ -30,9 +30,9 @@ class ConcertSeatTest {
                                       .reservedAt(LocalDateTime.now())
                                       .build();
 
-        assertThatThrownBy(() -> concertSeat.checkAvailableSeat(now, 5))
+        assertThatThrownBy(() -> concertSeat.checkReservableSeat(now, 5))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertSeatErrorCode.RESERVED_COMPLETE);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertSeatError.RESERVED_COMPLETE);
                 });
     }
 
@@ -53,9 +53,9 @@ class ConcertSeatTest {
                                       .reservedAt(null)
                                       .build();
 
-        assertThatThrownBy(() -> concertSeat.checkAvailableSeat(now, tempReservedMinutes))
+        assertThatThrownBy(() -> concertSeat.checkTemporaryReservedExpired(now, tempReservedMinutes))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getErrorCode()).isEqualTo(ConcertSeatErrorCode.RESERVED_EXPIRED);
+                    assertThat(ex.getDomainError()).isEqualTo(ConcertSeatError.RESERVED_EXPIRED);
                 });
     }
 
@@ -76,7 +76,7 @@ class ConcertSeatTest {
                                       .reservedAt(null)
                                       .build();
 
-        concertSeat.checkAvailableSeat(now, tempReservedMinutes);
+        concertSeat.checkReservableSeat(now, tempReservedMinutes);
         concertSeat.reserveSeatTemporarily(now);
 
         assertThat(concertSeat.getTempReservedAt()).isNotNull();

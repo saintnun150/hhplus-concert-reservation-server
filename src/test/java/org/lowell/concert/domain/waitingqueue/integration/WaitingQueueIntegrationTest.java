@@ -6,19 +6,15 @@ import org.junit.jupiter.api.Test;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueErrorCode;
+import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
 import org.lowell.concert.domain.waitingqueue.service.WaitingQueueService;
+import org.lowell.concert.infra.db.waitingqueue.WaitingQueueTokenJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,11 +23,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class WaitingQueueIntegrationTest {
 
     @Autowired
+    private WaitingQueueTokenJpaRepository waitingQueueTokenJpaRepository;
+    @Autowired
     private WaitingQueueService waitingQueueService;
 
     @AfterEach
     void tearDown() {
-        waitingQueueService.deleteAll();
+        waitingQueueTokenJpaRepository.deleteAll();
     }
 
     @DisplayName("대기열 생성 테스트")
@@ -72,7 +70,7 @@ public class WaitingQueueIntegrationTest {
         // then
         assertThatThrownBy(() -> waitingQueueService.getWaitingQueue(query))
                 .isInstanceOfSatisfying(DomainException.class, e -> {
-                    assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.NOT_FOUND_TOKEN);
+                    assertThat(e.getDomainError()).isEqualTo(WaitingQueueError.NOT_FOUND_TOKEN);
                 });
     }
 
@@ -88,7 +86,7 @@ public class WaitingQueueIntegrationTest {
         // then
         assertThatThrownBy(() -> waitingQueueService.getWaitingQueueOrder(query))
                 .isInstanceOfSatisfying(DomainException.class, e -> {
-                    assertThat(e.getErrorCode()).isEqualTo(WaitingQueueErrorCode.NOT_WAITING_STATUS);
+                    assertThat(e.getDomainError()).isEqualTo(WaitingQueueError.NOT_WAITING_STATUS);
                 });
     }
 
