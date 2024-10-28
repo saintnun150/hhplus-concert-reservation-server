@@ -50,11 +50,16 @@ public class WaitingQueueFacade {
     }
 
     @Transactional
-    public void scheduleActivationQueue() {
+    public void activateReadyWaitingQueues() {
         LocalDateTime now = LocalDateTime.now();
-        waitingQueueService.updateWaitingQueues(new WaitingQueueCommand.UpdateBatch(null,
-                                                                                    TokenStatus.ACTIVATE,
-                                                                                    now,
-                                                                                    now.plusMinutes(ConcertPolicy.EXPIRED_QUEUE_MINUTES)));
+        waitingQueueService.activateReadyWaitingQueues(
+                new WaitingQueueCommand.UpdateBatch(null,
+                                                    TokenStatus.ACTIVATE,
+                                                    now,
+                                                    now.plusMinutes(ConcertPolicy.EXPIRED_QUEUE_MINUTES)));
+    }
+
+    public void checkWaitingQueueActivate(String token, LocalDateTime now) {
+        waitingQueueService.checkWaitingQueueActivate(new WaitingQueueQuery.CheckQueueActivation(token, now));
     }
 }

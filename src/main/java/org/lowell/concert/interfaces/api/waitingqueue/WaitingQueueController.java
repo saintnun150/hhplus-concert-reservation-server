@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 public class WaitingQueueController implements WaitingQueueApiDocs {
     private final WaitingQueueFacade waitingQueueFacade;
 
-    @PostMapping("/tokens")
-    public ApiResponse<WaitingQueueResponse.QueueInfo> createQueue(WaitingQueueRequest.CreateQueue request) {
+    @PostMapping("")
+    public ApiResponse<WaitingQueueResponse.QueueInfo> createQueue() {
         WaitingQueueInfo.Get waitingQueue = waitingQueueFacade.createWaitingQueue();
         WaitingQueueResponse.QueueInfo token = WaitingQueueResponse.QueueInfo.builder()
                                                                              .tokenId(waitingQueue.getTokenId())
