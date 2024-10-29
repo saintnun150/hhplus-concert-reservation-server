@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class WaitingQueue {
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tokenId;
 

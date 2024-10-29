@@ -38,10 +38,11 @@ public class PaymentFacade {
     public PaymentInfo.Info payment(Long reservationId, String token) {
         ConcertReservation reservation = concertReservationService.getConcertReservationWithLock(new ConcertReservationQuery.Search(reservationId));
         reservation.isReservableStatus();
-        ConcertSeat concertSeat = concertSeatService.getConcertSeatWithLock(new ConcertSeatQuery.Search(reservation.getSeatId()));
 
         LocalDateTime paymentTime = LocalDateTime.now();
+        ConcertSeat concertSeat = concertSeatService.getConcertSeatWithLock(new ConcertSeatQuery.Search(reservation.getSeatId()));
         concertSeat.checkPayableSeat(paymentTime, ConcertPolicy.TEMP_RESERVED_SEAT_MINUTES);
+        concertSeat.reserveSeat(paymentTime);
 
         Long userId = reservation.getUserId();
         User user = userService.getUser(userId);
@@ -50,13 +51,14 @@ public class PaymentFacade {
         long price = concertSeat.getPrice();
         userAccount.useBalance(price);
 
-        concertSeat.reserveSeat(paymentTime);
         reservation.completeReservation(paymentTime);
 
         WaitingQueue waitingQueue = waitingQueueService.getWaitingQueue(new WaitingQueueQuery.GetQueue(token));
         waitingQueue.expiredToken(paymentTime, ConcertPolicy.EXPIRED_QUEUE_MINUTES);
 
-        Payment payment = paymentService.createPayment(new PaymentCommand.Create(reservation.getReservationId(), price, PaymentStatus.APPROVED));
+        Payment payment = paymentService.createPayment(new PaymentCommand.Create(reservation.getReservationId(),
+                                                                                 price,
+                                                                                 PaymentStatus.APPROVED));
         return new PaymentInfo.Info(payment.getPaymentId(),
                                     payment.getReservationId(),
                                     payment.getPayAmount(),

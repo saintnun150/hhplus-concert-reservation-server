@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.application.payment.PaymentFacade;
+import org.lowell.concert.application.support.DatabaseCleanUp;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.concert.exception.ConcertReservationError;
 import org.lowell.concert.domain.concert.exception.ConcertSeatError;
@@ -50,15 +51,12 @@ public class PaymentFacadeTest {
     @Autowired
     private PaymentJpaRepository paymentJpaRepository;
 
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp;
+
     @AfterEach
-    public void tearDown() {
-        paymentJpaRepository.deleteAll();
-        userJpaRepository.deleteAll();
-        userAccountJpaRepository.deleteAll();
-        concertSeatJpaRepository.deleteAll();
-        concertReservationJpaRepository.deleteAll();
-        waitingQueueTokenJpaRepository.deleteAll();
-        paymentJpaRepository.deleteAll();
+    void tearDown() {
+        databaseCleanUp.execute();
     }
 
     @DisplayName("예약된 정보가 없으면 결제에 실패한다.")

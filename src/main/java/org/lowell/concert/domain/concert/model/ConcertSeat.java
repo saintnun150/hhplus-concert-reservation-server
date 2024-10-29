@@ -17,7 +17,7 @@ public class ConcertSeat {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "seat_id")
+    @Column(name = "id")
     private Long seatId;
 
     @Column(name = "concert_schedule_id")
@@ -39,6 +39,9 @@ public class ConcertSeat {
     @Column(name = "reserved_at")
     private LocalDateTime reservedAt;
 
+//    @Version
+//    private Long version;
+
     @Builder
     public ConcertSeat(Long seatId, Long concertScheduleId, int seatNo, SeatStatus status, long price, LocalDateTime tempReservedAt, LocalDateTime reservedAt) {
         this.seatId = seatId;
@@ -48,6 +51,7 @@ public class ConcertSeat {
         this.price = price;
         this.tempReservedAt = tempReservedAt;
         this.reservedAt = reservedAt;
+//        this.version = 0L;
     }
 
     public boolean isEmpty() {
