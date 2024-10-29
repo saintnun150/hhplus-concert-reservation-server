@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.application.payment.PaymentFacade;
+import org.lowell.concert.application.support.DatabaseCleanUp;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.concert.exception.ConcertReservationError;
 import org.lowell.concert.domain.concert.model.ConcertReservation;
@@ -50,26 +51,12 @@ public class PaymentConcurrencyTest {
     @Autowired
     private PaymentJpaRepository paymentJpaRepository;
 
-    @BeforeEach
-    public void setUp() {
-        paymentJpaRepository.deleteAll();
-        userJpaRepository.deleteAll();
-        userAccountJpaRepository.deleteAll();
-        concertSeatJpaRepository.deleteAll();
-        concertReservationJpaRepository.deleteAll();
-        waitingQueueTokenJpaRepository.deleteAll();
-        paymentJpaRepository.deleteAll();
-    }
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp;
 
     @AfterEach
-    public void tearDown() {
-        paymentJpaRepository.deleteAll();
-        userJpaRepository.deleteAll();
-        userAccountJpaRepository.deleteAll();
-        concertSeatJpaRepository.deleteAll();
-        concertReservationJpaRepository.deleteAll();
-        waitingQueueTokenJpaRepository.deleteAll();
-        paymentJpaRepository.deleteAll();
+    void tearDown() {
+        databaseCleanUp.execute();
     }
 
     @DisplayName("같은 예약 건에 대해 결제 요청이 동시에 들어오면 하나만 성공한다.")

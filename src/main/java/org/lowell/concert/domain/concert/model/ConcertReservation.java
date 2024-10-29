@@ -17,7 +17,7 @@ public class ConcertReservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reservation_id")
+    @Column(name = "id")
     private Long reservationId;
 
     @Column(name = "seat_id")

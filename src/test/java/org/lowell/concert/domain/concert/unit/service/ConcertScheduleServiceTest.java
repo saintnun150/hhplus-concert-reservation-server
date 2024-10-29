@@ -48,7 +48,7 @@ class ConcertScheduleServiceTest {
     @Test
     void throwException_when_empty_concert_date() {
         ConcertScheduleQuery.SearchList query = new ConcertScheduleQuery.SearchList(1L, LocalDateTime.now());
-        when(concertScheduleRepository.getConcertDates(1L, LocalDateTime.now())).thenReturn(null);
+        when(concertScheduleRepository.getConcertDates(query.concertId(), query.scheduleDate())).thenReturn(null);
         assertThatThrownBy(() -> concertScheduleService.getConcertSchedules(query))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
                     assertThat(ex.getDomainError()).isEqualTo(ConcertScheduleError.NOT_FOUND_CONCERT_SCHEDULE);

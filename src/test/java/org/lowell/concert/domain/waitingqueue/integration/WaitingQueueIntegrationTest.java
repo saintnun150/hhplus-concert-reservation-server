@@ -3,6 +3,7 @@ package org.lowell.concert.domain.waitingqueue.integration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.lowell.concert.application.support.DatabaseCleanUp;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
@@ -27,9 +28,12 @@ public class WaitingQueueIntegrationTest {
     @Autowired
     private WaitingQueueService waitingQueueService;
 
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp;
+
     @AfterEach
     void tearDown() {
-        waitingQueueTokenJpaRepository.deleteAll();
+        databaseCleanUp.execute();
     }
 
     @DisplayName("대기열 생성 테스트")

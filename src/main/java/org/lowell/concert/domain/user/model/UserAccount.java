@@ -17,7 +17,7 @@ public class UserAccount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "account_id")
+    @Column(name = "id")
     private Long accountId;
 
     @Column(name = "user_id")
@@ -31,6 +31,9 @@ public class UserAccount {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Version
+    private Long version;
 
     @Builder
     public UserAccount(Long userId, Long balance) {

@@ -1,6 +1,7 @@
 package org.lowell.concert.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.user.dto.UserAccountCommand;
 import org.lowell.concert.domain.user.exception.UserAccountError;
@@ -9,6 +10,7 @@ import org.lowell.concert.domain.user.repository.UserAccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserAccountService {
@@ -34,7 +36,7 @@ public class UserAccountService {
 
     @Transactional
     public UserAccount chargeBalance(UserAccountCommand.Action action) {
-        UserAccount userAccount = getUserAccountWithLock(action.userId());
+        UserAccount userAccount = getUserAccount(action.userId());
         userAccount.chargeBalance(action.amount());
         return userAccount;
     }

@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface UserAccountJpaRepository extends JpaRepository<UserAccount, Long> {
+
+//    @Lock(LockModeType.OPTIMISTIC)
     Optional<UserAccount> findByUserId(Long userId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

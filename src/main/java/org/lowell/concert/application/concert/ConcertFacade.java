@@ -1,6 +1,7 @@
 package org.lowell.concert.application.concert;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.concert.dto.ConcertReservationCommand;
 import org.lowell.concert.domain.concert.dto.ConcertScheduleQuery;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ConcertFacade {
