@@ -40,7 +40,7 @@ public class PaymentFacade {
         reservation.isReservableStatus();
 
         LocalDateTime paymentTime = LocalDateTime.now();
-        ConcertSeat concertSeat = concertSeatService.getConcertSeatWithLock(new ConcertSeatQuery.Search(reservation.getSeatId()));
+        ConcertSeat concertSeat = concertSeatService.getConcertSeat(new ConcertSeatQuery.Search(reservation.getSeatId()));
         concertSeat.checkPayableSeat(paymentTime, ConcertPolicy.TEMP_RESERVED_SEAT_MINUTES);
         concertSeat.reserveSeat(paymentTime);
 
