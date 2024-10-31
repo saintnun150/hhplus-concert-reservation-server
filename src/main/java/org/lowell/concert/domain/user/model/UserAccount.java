@@ -32,8 +32,8 @@ public class UserAccount {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-//    @Version
-//    private Long version;
+    @Version
+    private Long version;
 
     @Builder
     public UserAccount(Long userId, Long balance) {
