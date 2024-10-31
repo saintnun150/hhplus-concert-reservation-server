@@ -67,7 +67,7 @@ public class ConcertFacade {
     @Transactional
     public ConcertInfo.ReservationInfo reserveConcertSeat(Long seatId, Long userId) {
         User user = userService.getUser(userId);
-        ConcertSeat seat = concertSeatService.getConcertSeatWithLock(new ConcertSeatQuery.Search(seatId));
+        ConcertSeat seat = concertSeatService.getConcertSeat(new ConcertSeatQuery.Search(seatId));
         seat.checkReservableSeat(LocalDateTime.now(), ConcertPolicy.TEMP_RESERVED_SEAT_MINUTES);
         seat.reserveSeatTemporarily(LocalDateTime.now());
 

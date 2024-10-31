@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.application.support.DatabaseCleanUp;
 import org.lowell.concert.domain.common.exception.DomainException;
+import org.lowell.concert.domain.common.support.LockRepository;
 import org.lowell.concert.domain.user.dto.UserAccountCommand;
 import org.lowell.concert.domain.user.model.UserAccount;
 import org.lowell.concert.domain.user.service.UserAccountService;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +32,12 @@ public class UserAccountConcurrencyTest {
     private UserAccountService accountService;
 
     @Autowired
+    private LockRepository lockRepository;
+
+    @Autowired
     private DatabaseCleanUp databaseCleanUp;
+    @Autowired
+    private UserAccountService userAccountService;
 
     @AfterEach
     void tearDown() {
@@ -83,48 +90,56 @@ public class UserAccountConcurrencyTest {
         assertThat(userAccount.getBalance()).isEqualTo(balance - usageAmount * success.get());
     }
 
+    @DisplayName("포인트 충전 메서드 시작과 끝에 Redis setNX를 이용해 락을 잡는 테스트")
+    @Test
+    void redisTest() throws InterruptedException {
+
+        // given
+        Long userId = 1L;
+        long balance = 10000;
+        long usageAmount = 10;
+        int chargeCount = 10;
+
+        UserAccount account = userAccountJpaRepository.save(UserAccount.builder()
+                                                                       .userId(userId)
+                                                                       .balance(balance)
+                                                                       .build());
+
+        String lockKey = String.valueOf(account.getAccountId());
+
+        ExecutorService executorService = Executors.newFixedThreadPool(chargeCount);
+        CountDownLatch latch = new CountDownLatch(chargeCount);
+
+        AtomicInteger success = new AtomicInteger(0);
+        AtomicInteger failed = new AtomicInteger(0);
+
+        for (int i = 0; i < chargeCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    Boolean lock = lockRepository.lock(lockKey, 2000L, TimeUnit.MILLISECONDS);
+                    if (lock) {
+                        userAccountService.chargeBalance(new UserAccountCommand.Action(account.getUserId(), usageAmount));
+                    }
+
+                    success.incrementAndGet();
+                } catch (Exception e) {
+                    failed.incrementAndGet();
+                } finally {
+                    lockRepository.unlock(lockKey);
+                    latch.countDown();
+                }
+            });
+        }
+        latch.await();
+        executorService.shutdown();
+
+        userAccountJpaRepository.findByUserId(userId)
+                                .ifPresent(userAccount -> {
+                                    assertThat(userAccount.getBalance()).isEqualTo(10010L);
+                                });
+    }
 
 
-//    @DisplayName("포인트 충전 시 충전한 만큼 모두 증가한다")
-//    @Test
-//    void chargeBalanceConcurrency() throws InterruptedException {
-//        // given
-//        Long userId = 1L;
-//        long balance = 100;
-//        long chargeAmount = 1000;
-//        int chargeCount = 10;
-//
-//        UserAccount account = userAccountJpaRepository.save(UserAccount.builder()
-//                                                                       .userId(userId)
-//                                                                       .balance(balance)
-//                                                                       .build());
-//        // when
-//        ExecutorService executorService = Executors.newFixedThreadPool(chargeCount);
-//        CountDownLatch latch = new CountDownLatch(chargeCount);
-//
-//        AtomicInteger success = new AtomicInteger(0);
-//        AtomicInteger failed = new AtomicInteger(0);
-//
-//        for (int i = 0; i < chargeCount; i++) {
-//            executorService.submit(() -> {
-//                try {
-//                    accountService.chargeBalance(new UserAccountCommand.Action(userId, chargeAmount));
-//                    success.incrementAndGet();
-//                } catch (Exception e) {
-//                    failed.incrementAndGet();
-//                } finally {
-//                    latch.countDown();
-//                }
-//            });
-//        }
-//        latch.await();
-//        executorService.shutdown();
-//
-//        // then
-//        assertThat(success.get()).isEqualTo(chargeCount);
-//        UserAccount userAccount = accountService.getUserAccount(userId);
-//        assertThat(userAccount.getBalance()).isEqualTo(balance + chargeAmount * chargeCount);
-//    }
 
 
 }

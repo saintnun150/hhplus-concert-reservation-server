@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.application.concert.ConcertFacade;
 import org.lowell.concert.application.support.DatabaseCleanUp;
+import org.lowell.concert.domain.common.support.LockRepository;
 import org.lowell.concert.domain.concert.model.ConcertSeat;
 import org.lowell.concert.domain.concert.model.SeatStatus;
 import org.lowell.concert.domain.user.model.User;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,6 +37,9 @@ public class ConcertReservationConcurrencyTest {
 
     @Autowired
     private ConcertSeatJpaRepository concertSeatJpaRepository;
+
+    @Autowired
+    private LockRepository lockRepository;
 
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
@@ -112,7 +117,7 @@ public class ConcertReservationConcurrencyTest {
                       .username("user1")
                       .build();
 
-        int reserveCount = 3;
+        int reserveCount = 1000;
         userJpaRepository.saveAll(List.of(u1));
         concertSeatJpaRepository.saveAll(List.of(new ConcertSeat(1L, 1L, 1, SeatStatus.EMPTY, 1000, null, null),
                                                  new ConcertSeat(2L, 1L, 2, SeatStatus.EMPTY, 1000, null, null)));
@@ -134,6 +139,12 @@ public class ConcertReservationConcurrencyTest {
     }
 
     private void attemptReservation(ConcertFacade concertFacade, Long seatId, Long userId, AtomicInteger success, AtomicInteger failed, CountDownLatch latch) {
+        String lockKey = "concert:seat:" + seatId;
+        Boolean lock = false;
+        while (!lock) {
+            lock = lockRepository.lock(lockKey, 2000L, TimeUnit.MILLISECONDS);
+        }
+
         try {
             concertFacade.reserveConcertSeat(seatId, userId);
             success.incrementAndGet();
@@ -141,6 +152,7 @@ public class ConcertReservationConcurrencyTest {
             log.error("## error : {}", e.getClass().getSimpleName());
             failed.incrementAndGet();
         } finally {
+            lockRepository.unlock(lockKey);
             latch.countDown();
         }
     }

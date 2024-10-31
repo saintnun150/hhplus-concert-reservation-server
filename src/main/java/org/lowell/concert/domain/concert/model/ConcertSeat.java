@@ -39,8 +39,8 @@ public class ConcertSeat {
     @Column(name = "reserved_at")
     private LocalDateTime reservedAt;
 
-//    @Version
-//    private Long version;
+    @Version
+    private Long version;
 
     @Builder
     public ConcertSeat(Long seatId, Long concertScheduleId, int seatNo, SeatStatus status, long price, LocalDateTime tempReservedAt, LocalDateTime reservedAt) {

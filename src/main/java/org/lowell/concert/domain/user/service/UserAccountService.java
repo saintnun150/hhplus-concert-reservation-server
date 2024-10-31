@@ -36,6 +36,7 @@ public class UserAccountService {
 
     @Transactional
     public UserAccount chargeBalance(UserAccountCommand.Action action) {
+        log.warn("## 충전 실행");
         UserAccount userAccount = getUserAccount(action.userId());
         userAccount.chargeBalance(action.amount());
         return userAccount;
