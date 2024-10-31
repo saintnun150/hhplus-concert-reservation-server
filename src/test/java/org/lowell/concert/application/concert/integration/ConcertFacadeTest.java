@@ -2,7 +2,6 @@ package org.lowell.concert.application.concert.integration;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.application.concert.ConcertFacade;
@@ -25,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest
-public class ConcertReservationConcurrencyTest {
+public class ConcertFacadeTest {
 
     @Autowired
     private ConcertFacade concertFacade;
