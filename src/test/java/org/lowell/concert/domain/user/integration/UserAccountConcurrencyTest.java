@@ -10,6 +10,8 @@ import org.lowell.concert.domain.user.dto.UserAccountCommand;
 import org.lowell.concert.domain.user.model.UserAccount;
 import org.lowell.concert.domain.user.service.UserAccountService;
 import org.lowell.concert.infra.db.user.repository.UserAccountJpaRepository;
+import org.lowell.concert.infra.redis.support.RedisSimpleLockRepository;
+import org.lowell.concert.infra.redis.support.RedisSpinLockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -17,6 +19,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +37,12 @@ public class UserAccountConcurrencyTest {
 
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
+
+    @Autowired
+    private RedisSimpleLockRepository simpleLockRepository;
+
+    @Autowired
+    private RedisSpinLockRepository spinLockRepository;
 
     @AfterEach
     void tearDown() {
@@ -85,49 +94,6 @@ public class UserAccountConcurrencyTest {
         UserAccount userAccount = accountService.getUserAccount(userId);
         assertThat(userAccount.getBalance()).isEqualTo(balance - usageAmount * success.get());
     }
-
-
-
-//    @DisplayName("포인트 충전 시 충전한 만큼 모두 증가한다")
-//    @Test
-//    void chargeBalanceConcurrency() throws InterruptedException {
-//        // given
-//        Long userId = 1L;
-//        long balance = 100;
-//        long chargeAmount = 1000;
-//        int chargeCount = 10;
-//
-//        UserAccount account = userAccountJpaRepository.save(UserAccount.builder()
-//                                                                       .userId(userId)
-//                                                                       .balance(balance)
-//                                                                       .build());
-//        // when
-//        ExecutorService executorService = Executors.newFixedThreadPool(chargeCount);
-//        CountDownLatch latch = new CountDownLatch(chargeCount);
-//
-//        AtomicInteger success = new AtomicInteger(0);
-//        AtomicInteger failed = new AtomicInteger(0);
-//
-//        for (int i = 0; i < chargeCount; i++) {
-//            executorService.submit(() -> {
-//                try {
-//                    accountService.chargeBalance(new UserAccountCommand.Action(userId, chargeAmount));
-//                    success.incrementAndGet();
-//                } catch (Exception e) {
-//                    failed.incrementAndGet();
-//                } finally {
-//                    latch.countDown();
-//                }
-//            });
-//        }
-//        latch.await();
-//        executorService.shutdown();
-//
-//        // then
-//        assertThat(success.get()).isEqualTo(chargeCount);
-//        UserAccount userAccount = accountService.getUserAccount(userId);
-//        assertThat(userAccount.getBalance()).isEqualTo(balance + chargeAmount * chargeCount);
-//    }
 
     @DisplayName("낙관적 락을 사용해 포인트 충전을 10번 할 경우 한 건만 성공한다.")
     @Test
@@ -260,5 +226,99 @@ public class UserAccountConcurrencyTest {
         UserAccount userAccount = accountService.getUserAccount(userId);
         assertThat(userAccount.getBalance()).isEqualTo(balance + chargeAmount * success.get());
     }
+
+
+    @DisplayName("레디스 Simple Lock을 사용해 포인트 충전을 100번 할 경우 1번 성공한다.")
+    @Test
+    void attemptChargeWithRedisSimpleLock100Times() throws InterruptedException {
+        Long userId = 1L;
+        long balance = 100;
+        long chargeAmount = 1000;
+        int chargeCount = 100;
+
+        UserAccount account = userAccountJpaRepository.save(UserAccount.builder()
+                                                                       .userId(userId)
+                                                                       .balance(balance)
+                                                                       .build());
+        ExecutorService executorService = Executors.newFixedThreadPool(chargeCount);
+        CountDownLatch latch = new CountDownLatch(chargeCount);
+
+        AtomicInteger success = new AtomicInteger(0);
+        AtomicInteger failed = new AtomicInteger(0);
+
+        for (int i = 0; i < chargeCount; i++) {
+            executorService.submit(() -> {
+                String lockKey = "user:account:" + userId;
+                try {
+                    Boolean lock = simpleLockRepository.tryLock(lockKey, "", 1000L, TimeUnit.MILLISECONDS);
+                    if (lock) {
+                        accountService.chargeBalance(new UserAccountCommand.Action(userId, chargeAmount));
+                        success.incrementAndGet();
+                    }
+                } catch (Exception e) {
+                    log.warn("## charge error:[{}]", e.getClass().getSimpleName(), e);
+                    failed.incrementAndGet();
+                } finally {
+                    latch.countDown();
+                    simpleLockRepository.unlock(lockKey);
+                }
+            });
+        }
+        latch.await();
+        executorService.shutdown();
+
+        // then
+        assertThat(success.get()).isEqualTo(1);
+        UserAccount userAccount = accountService.getUserAccount(userId);
+        assertThat(userAccount.getBalance()).isEqualTo(balance + chargeAmount * success.get());
+    }
+
+    @DisplayName("레디스 SpinLock을 사용해 포인트 충전을 1000번 할 경우 모두 성공한다.")
+    @Test
+    void attemptChargeWithRedisSpinLock1000Times() throws InterruptedException {
+        Long userId = 1L;
+        long balance = 100;
+        long chargeAmount = 1000;
+        int chargeCount = 1000;
+
+        UserAccount account = userAccountJpaRepository.save(UserAccount.builder()
+                                                                       .userId(userId)
+                                                                       .balance(balance)
+                                                                       .build());
+        ExecutorService executorService = Executors.newFixedThreadPool(chargeCount);
+        CountDownLatch latch = new CountDownLatch(chargeCount);
+
+        AtomicInteger success = new AtomicInteger(0);
+        AtomicInteger failed = new AtomicInteger(0);
+        AtomicInteger unlock = new AtomicInteger(0);
+
+        for (int i = 0; i < chargeCount; i++) {
+            executorService.submit(() -> {
+                String lockKey = "user:account:" + userId;
+                try {
+                    Boolean lock = spinLockRepository.tryLock(lockKey, "", 200L, TimeUnit.MILLISECONDS);
+                    if (lock) {
+                        accountService.chargeBalance(new UserAccountCommand.Action(userId, chargeAmount));
+                        success.incrementAndGet();
+                    }
+                } catch (Exception e) {
+                    log.warn("## charge error:[{}]", e.getClass().getSimpleName(), e);
+                    failed.incrementAndGet();
+                } finally {
+                    simpleLockRepository.unlock(lockKey);
+                    latch.countDown();
+                }
+            });
+        }
+        latch.await();
+        executorService.shutdown();
+
+        // then
+        assertThat(success.get()).isEqualTo(1000);
+        UserAccount userAccount = accountService.getUserAccount(userId);
+        assertThat(userAccount.getBalance()).isEqualTo(balance + chargeAmount * success.get());
+    }
+
+
 
 }
