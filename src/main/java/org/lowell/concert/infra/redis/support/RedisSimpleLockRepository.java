@@ -17,6 +17,11 @@ public class RedisSimpleLockRepository implements LockRepository {
     }
 
     @Override
+    public Boolean tryLock(String lockKey, String value, Long waitTime, Long leaseTime, TimeUnit timeUnit) {
+        return false;
+    }
+
+    @Override
     public Boolean unlock(String lockKey) {
         return redisRepository.delete(lockKey);
     }
