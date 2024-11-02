@@ -37,4 +37,16 @@ public class UserFacade {
                                         userAccount.getCreatedAt(),
                                         userAccount.getUpdatedAt());
     }
+
+    @Transactional
+    public UserInfo.AccountInfo chargeBalanceWithLock(Long userId, Long balance) {
+        User user = userService.getUser(userId);
+        UserAccount userAccount = userAccountService.chargeBalanceWithLock(new UserAccountCommand.Action(userId, balance));
+        return new UserInfo.AccountInfo(userAccount.getAccountId(),
+                                        user.getUserId(),
+                                        user.getUsername(),
+                                        userAccount.getBalance(),
+                                        userAccount.getCreatedAt(),
+                                        userAccount.getUpdatedAt());
+    }
 }

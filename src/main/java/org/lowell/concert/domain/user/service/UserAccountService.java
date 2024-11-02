@@ -42,6 +42,13 @@ public class UserAccountService {
     }
 
     @Transactional
+    public UserAccount chargeBalanceWithLock(UserAccountCommand.Action action) {
+        UserAccount userAccount = getUserAccountWithLock(action.userId());
+        userAccount.chargeBalance(action.amount());
+        return userAccount;
+    }
+
+    @Transactional
     public UserAccount useBalance(UserAccountCommand.Action action) {
         UserAccount userAccount = getUserAccountWithLock(action.userId());
         userAccount.useBalance(action.amount());
