@@ -2,7 +2,7 @@ package org.lowell.concert.infra.redis.support;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.lowell.concert.domain.common.support.lock.LockRepository;
+import org.lowell.concert.domain.support.lock.LockManager;
 import org.lowell.concert.infra.redis.support.enums.LockType;
 import org.springframework.stereotype.Repository;
 
@@ -11,13 +11,14 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class RedisSpinLockRepository implements LockRepository {
+public class RedisSpinLockManager implements LockManager {
     private final RedisRepository redisRepository;
 
     @Override
-    public Boolean tryLock(String lockKey, String value, Long leaseTime, TimeUnit timeUnit) {
+    public Boolean tryLock(String lockKey, Long waitTime, Long leaseTime, TimeUnit timeUnit) {
+        long retryTime = System.currentTimeMillis() + timeUnit.toMillis(waitTime);
         while (true) {
-            if (redisRepository.setIfAbsent(lockKey, value, leaseTime, timeUnit)) {
+            if (redisRepository.setIfAbsent(lockKey, "", leaseTime, timeUnit)) {
                 return true;
             }
             try {
@@ -27,15 +28,11 @@ public class RedisSpinLockRepository implements LockRepository {
                 return false;
             }
         }
+//        return false;
     }
 
     @Override
-    public Boolean tryLock(String lockKey, String value, Long waitTime, Long leaseTime, TimeUnit timeUnit) {
-        return false;
-    }
-
-    @Override
-    public Boolean unlock(String lockKey) {
-        return redisRepository.delete(lockKey);
+    public void unlock(String lockKey) {
+        redisRepository.delete(lockKey);
     }
 }

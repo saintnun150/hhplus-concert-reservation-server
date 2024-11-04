@@ -10,9 +10,9 @@ import org.lowell.concert.domain.user.dto.UserAccountCommand;
 import org.lowell.concert.domain.user.model.UserAccount;
 import org.lowell.concert.domain.user.service.UserAccountService;
 import org.lowell.concert.infra.db.user.repository.UserAccountJpaRepository;
-import org.lowell.concert.infra.redis.support.RedisRLockRepository;
-import org.lowell.concert.infra.redis.support.RedisSimpleLockRepository;
-import org.lowell.concert.infra.redis.support.RedisSpinLockRepository;
+import org.lowell.concert.infra.redis.support.RedisRLockManager;
+import org.lowell.concert.infra.redis.support.RedisSimpleLockManager;
+import org.lowell.concert.infra.redis.support.RedisSpinLockManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -40,13 +40,13 @@ public class UserAccountConcurrencyTest {
     private DatabaseCleanUp databaseCleanUp;
 
     @Autowired
-    private RedisSimpleLockRepository simpleLockRepository;
+    private RedisSimpleLockManager simpleLockRepository;
 
     @Autowired
-    private RedisSpinLockRepository spinLockRepository;
+    private RedisSpinLockManager spinLockRepository;
 
     @Autowired
-    private RedisRLockRepository rLockRepository;
+    private RedisRLockManager rLockRepository;
 
     @AfterEach
     void tearDown() {
@@ -212,7 +212,7 @@ public class UserAccountConcurrencyTest {
             executorService.submit(() -> {
                 String lockKey = "user:account:" + userId;
                 try {
-                    Boolean lock = simpleLockRepository.tryLock(lockKey, "", 1000L, TimeUnit.MILLISECONDS);
+                    Boolean lock = simpleLockRepository.tryLock(lockKey, 1200L, 1000L, TimeUnit.MILLISECONDS);
                     if (lock) {
                         accountService.chargeBalance(new UserAccountCommand.Action(userId, chargeAmount));
                         success.incrementAndGet();
@@ -257,7 +257,7 @@ public class UserAccountConcurrencyTest {
             executorService.submit(() -> {
                 String lockKey = "user:account:" + userId;
                 try {
-                    Boolean lock = spinLockRepository.tryLock(lockKey, "", 200L, TimeUnit.MILLISECONDS);
+                    Boolean lock = spinLockRepository.tryLock(lockKey, 500L, 200L, TimeUnit.MILLISECONDS);
                     if (lock) {
                         accountService.chargeBalance(new UserAccountCommand.Action(userId, chargeAmount));
                         success.incrementAndGet();
@@ -304,7 +304,7 @@ public class UserAccountConcurrencyTest {
                 String lockKey = "user:account:" + userId;
                 Boolean lock = false;
                 try {
-                    lock = rLockRepository.tryLock(lockKey, "", 5000L, 3000L, TimeUnit.MILLISECONDS);
+                    lock = rLockRepository.tryLock(lockKey, 5000L, 3000L, TimeUnit.MILLISECONDS);
                     if (lock) {
                         accountService.chargeBalance(new UserAccountCommand.Action(userId, chargeAmount));
                         success.incrementAndGet();
