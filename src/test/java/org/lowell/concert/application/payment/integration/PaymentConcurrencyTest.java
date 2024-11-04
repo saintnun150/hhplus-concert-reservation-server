@@ -1,5 +1,6 @@
 package org.lowell.concert.application.payment.integration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @SpringBootTest
 public class PaymentConcurrencyTest {
 
@@ -110,6 +112,7 @@ public class PaymentConcurrencyTest {
                     paymentFacade.payment(reservation.getReservationId(), token.getToken());
                     success.incrementAndGet();
                 } catch (Exception e) {
+                    log.error("## errorMsg:[{}]", e.getClass().getSimpleName());
                     if (e instanceof DomainException && ((DomainException) e).getDomainError() == ConcertReservationError.STATE_COMPLETE) {
                         failed.incrementAndGet();
                     }

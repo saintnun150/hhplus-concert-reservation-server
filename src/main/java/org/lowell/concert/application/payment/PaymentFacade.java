@@ -1,6 +1,7 @@
 package org.lowell.concert.application.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.lowell.concert.domain.support.lock.DistributedLock;
 import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.concert.dto.ConcertReservationQuery;
 import org.lowell.concert.domain.concert.dto.ConcertSeatQuery;
@@ -34,9 +35,10 @@ public class PaymentFacade {
     private final ConcertReservationService concertReservationService;
     private final WaitingQueueService waitingQueueService;
 
+    @DistributedLock(lockKey = "#reservationId")
     @Transactional
     public PaymentInfo.Info payment(Long reservationId, String token) {
-        ConcertReservation reservation = concertReservationService.getConcertReservationWithLock(new ConcertReservationQuery.Search(reservationId));
+        ConcertReservation reservation = concertReservationService.getConcertReservation(new ConcertReservationQuery.Search(reservationId));
         reservation.isReservableStatus();
 
         LocalDateTime paymentTime = LocalDateTime.now();
@@ -46,7 +48,7 @@ public class PaymentFacade {
 
         Long userId = reservation.getUserId();
         User user = userService.getUser(userId);
-        UserAccount userAccount = userAccountService.getUserAccountWithLock(user.getUserId());
+        UserAccount userAccount = userAccountService.getUserAccount(user.getUserId());
 
         long price = concertSeat.getPrice();
         userAccount.useBalance(price);
