@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface WaitingQueueTokenJpaRepository extends JpaRepository<WaitingQueue, Long> {
+public interface WaitingQueueJpaRepository extends JpaRepository<WaitingQueue, Long> {
     Optional<WaitingQueue> findByToken(String token);
     Long countByTokenStatus(TokenStatus status);
     Long countByTokenIdLessThanEqualAndTokenStatus(Long tokenId, TokenStatus status);

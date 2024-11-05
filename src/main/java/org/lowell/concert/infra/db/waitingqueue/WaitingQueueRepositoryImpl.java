@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
-    private final WaitingQueueTokenJpaRepository jpaRepository;
+    private final WaitingQueueJpaRepository jpaRepository;
 
     @Override
     public WaitingQueue createWaitingQueue(WaitingQueueCommand.Create command) {

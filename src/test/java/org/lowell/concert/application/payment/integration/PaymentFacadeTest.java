@@ -23,7 +23,7 @@ import org.lowell.concert.infra.db.concert.repository.ConcertSeatJpaRepository;
 import org.lowell.concert.infra.db.payment.repository.PaymentJpaRepository;
 import org.lowell.concert.infra.db.user.repository.UserAccountJpaRepository;
 import org.lowell.concert.infra.db.user.repository.UserJpaRepository;
-import org.lowell.concert.infra.db.waitingqueue.WaitingQueueTokenJpaRepository;
+import org.lowell.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -43,7 +43,7 @@ public class PaymentFacadeTest {
     @Autowired
     private ConcertReservationJpaRepository concertReservationJpaRepository;
     @Autowired
-    private WaitingQueueTokenJpaRepository waitingQueueTokenJpaRepository;
+    private WaitingQueueJpaRepository waitingQueueJpaRepository;
     @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
@@ -202,13 +202,13 @@ public class PaymentFacadeTest {
                                                                                           .status(ReservationStatus.PENDING)
                                                                                           .build());
 
-        waitingQueueTokenJpaRepository.save(WaitingQueue.builder()
-                                                        .tokenId(1L)
-                                                        .token("token")
-                                                        .tokenStatus(TokenStatus.ACTIVATE)
-                                                        .createdAt(LocalDateTime.now().minusMinutes(5))
-                                                        .expiresAt(LocalDateTime.now().minusMinutes(20))
-                                                        .build());
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+                                                   .tokenId(1L)
+                                                   .token("token")
+                                                   .tokenStatus(TokenStatus.ACTIVATE)
+                                                   .createdAt(LocalDateTime.now().minusMinutes(5))
+                                                   .expiresAt(LocalDateTime.now().minusMinutes(20))
+                                                   .build());
 
         assertThatThrownBy(() -> paymentFacade.payment(saved.getReservationId(), "token"))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {

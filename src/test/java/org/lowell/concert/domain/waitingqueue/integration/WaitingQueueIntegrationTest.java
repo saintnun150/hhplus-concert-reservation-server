@@ -11,7 +11,7 @@ import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
 import org.lowell.concert.domain.waitingqueue.service.WaitingQueueService;
-import org.lowell.concert.infra.db.waitingqueue.WaitingQueueTokenJpaRepository;
+import org.lowell.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class WaitingQueueIntegrationTest {
 
     @Autowired
-    private WaitingQueueTokenJpaRepository waitingQueueTokenJpaRepository;
+    private WaitingQueueJpaRepository waitingQueueJpaRepository;
     @Autowired
     private WaitingQueueService waitingQueueService;
 
