@@ -16,7 +16,6 @@ public interface ConcertApiDocs {
 
     @Operation(summary = "예약 가능한 콘서트 날짜 조회", description = "예약 가능한 콘서트 날짜 목록을 반환한다.")
     ApiResponse<List<ConcertResponse.ScheduleInfo>> getSchedules(@PathVariable Long concertId,
-                                                                    ConcertRequest.SearchDate request,
                                                                     @Parameter(hidden = true) String token);
 
     @Operation(summary = "예약 가능한 좌석 조회", description = "예약 가능한 좌석 목록을 반환한다.")

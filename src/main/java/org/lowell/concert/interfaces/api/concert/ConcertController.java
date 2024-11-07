@@ -30,9 +30,8 @@ public class ConcertController implements ConcertApiDocs {
     @SecurityRequirement(name = "queueToken")
     @GetMapping("/{concertId}/schedules")
     public ApiResponse<List<ConcertResponse.ScheduleInfo>> getSchedules(@PathVariable Long concertId,
-                                                                        ConcertRequest.SearchDate request,
                                                                         @RequestHeader("X-QUEUE-TOKEN") String token) {
-        List<ConcertInfo.ScheduleInfo> schedules = concertFacade.getConcertSchedule(concertId, LocalDateTime.now());
+        List<ConcertInfo.ScheduleInfo> schedules = concertFacade.getConcertSchedule(concertId, null);
         List<ConcertResponse.ScheduleInfo> response = schedules.stream()
                                                                .map(schedule -> ConcertResponse.ScheduleInfo.builder()
                                                                                                             .scheduleId(schedule.getScheduleId())
