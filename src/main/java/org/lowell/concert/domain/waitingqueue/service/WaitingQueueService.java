@@ -1,6 +1,5 @@
 package org.lowell.concert.domain.waitingqueue.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lowell.concert.application.waitingqueue.WaitingQueueInfo;
 import org.lowell.concert.domain.common.exception.DomainException;
@@ -11,19 +10,24 @@ import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueueToken;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
+import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueProvider;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class WaitingQueueService {
-    private static final int ACTIVATE_CAPACITY = 50;
     private final WaitingQueueRepository queueRepository;
+
+    public WaitingQueueService(WaitingQueueProvider waitingQueueProvider, @Value("${waiting-queue.type:redis}") String type) {
+        this.queueRepository = waitingQueueProvider.getWaitingQueueRepository(type);
+    }
 
     @Transactional
     public WaitingQueueTokenInfo createQueueToken(WaitingQueueCommand.CreateToken command) {
@@ -41,25 +45,38 @@ public class WaitingQueueService {
             return new WaitingQueueInfo.Get(queueTokenInfo.getToken(),
                                            queueTokenInfo.getTokenStatus(),
                                            queueTokenInfo.getExpiresAt(),
-                                           0L);
+                                           0L, 0L);
         }
         Long order = queueRepository.findWaitingTokenOrder(new WaitingQueueQuery.GetOrder(queueTokenInfo.getToken(),
                                                                                           TokenStatus.WAITING));
         if (order == null) {
             throw DomainException.create(WaitingQueueError.NOT_WAITING_STATUS);
         }
+        long waitingTime = calculateWaitingTimeSeconds(order,
+                                                      ConcertPolicy.ACTIVATE_QUEUE_INTERVAL,
+                                                      ConcertPolicy.ACTIVATE_QUEUE_TIME_UNIT,
+                                                      ConcertPolicy.ACTIVATE_QUEUE_SIZE);
+
+
         return new WaitingQueueInfo.Get(queueTokenInfo.getToken(),
                                         queueTokenInfo.getTokenStatus(),
                                         queueTokenInfo.getExpiresAt(),
-                                        order);
+                                        order,
+                                        waitingTime);
+    }
+
+    public long calculateWaitingTimeSeconds(Long order, Long intervalTime, TimeUnit unit, Long activateCount) {
+        long intervalInSeconds = unit.toSeconds(intervalTime);
+        long remainingIntervals = (order - 1) / activateCount;
+        return remainingIntervals * intervalInSeconds;
     }
 
     public boolean hasCapacityForActiveToken() {
-        Long activeCount = queueRepository.findActivateQueueTokenCount(TokenStatus.ACTIVATE);
+        Long activeCount = queueRepository.findTokenCount(TokenStatus.ACTIVATE);
         if (activeCount == null || activeCount == 0) {
             return true;
         }
-        return activeCount < ACTIVATE_CAPACITY;
+        return activeCount < ConcertPolicy.ACTIVATE_QUEUE_CAPACITY;
     }
 
     public List<WaitingQueueToken> getQueueTokensByStatusAndSize(WaitingQueueQuery.GetQueues query) {
@@ -67,32 +84,15 @@ public class WaitingQueueService {
     }
 
     public int countReadyToActivateToken() {
-        Long activateQueueCount = queueRepository.findActivateQueueTokenCount(TokenStatus.ACTIVATE);
+        Long activateQueueCount = queueRepository.findTokenCount(TokenStatus.ACTIVATE);
         if (activateQueueCount == null || activateQueueCount == 0) {
-            return ACTIVATE_CAPACITY;
+            return ConcertPolicy.ACTIVATE_QUEUE_CAPACITY;
         }
-        return ACTIVATE_CAPACITY - activateQueueCount.intValue();
+        return ConcertPolicy.ACTIVATE_QUEUE_CAPACITY - activateQueueCount.intValue();
     }
 
-    public void activateWaitingToken(WaitingQueueCommand.UpdateBatch command) {
-        int count = countReadyToActivateToken();
-        if (count == 0) {
-            log.info("## No capacity to activate waiting queues");
-            return;
-        }
-        List<WaitingQueueToken> waitingQueueTokens = getQueueTokensByStatusAndSize(new WaitingQueueQuery.GetQueues(TokenStatus.WAITING, count));
-        if (waitingQueueTokens.isEmpty()) {
-            log.info("## No waiting queues to activate");
-            return;
-        }
-        List<Long> tokenIds = waitingQueueTokens.stream()
-                                                .map(WaitingQueueToken::getTokenId)
-                                                .toList();
-        command = new WaitingQueueCommand.UpdateBatch(tokenIds,
-                                                      TokenStatus.ACTIVATE,
-                                                      command.updatedAt(),
-                                                      command.expiresAt());
-        queueRepository.updateAll(command);
+    public void activateWaitingToken(WaitingQueueQuery.GetQueues query) {
+        queueRepository.activateWaitingToken(query);
     }
 
     public void ensureQueueTokenIsActiveAndValid(WaitingQueueQuery.CheckQueueActivation query) {
