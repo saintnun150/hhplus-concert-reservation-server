@@ -17,8 +17,9 @@ import org.lowell.concert.domain.user.model.User;
 import org.lowell.concert.domain.user.model.UserAccount;
 import org.lowell.concert.domain.user.service.UserAccountService;
 import org.lowell.concert.domain.user.service.UserService;
+import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
-import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
+import org.lowell.concert.domain.waitingqueue.model.WaitingQueueToken;
 import org.lowell.concert.domain.waitingqueue.service.WaitingQueueService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,8 +56,7 @@ public class PaymentFacade {
 
         reservation.completeReservation(paymentTime);
 
-        WaitingQueue waitingQueue = waitingQueueService.getWaitingQueue(new WaitingQueueQuery.GetQueue(token));
-        waitingQueue.expiredToken(paymentTime, ConcertPolicy.EXPIRED_QUEUE_MINUTES);
+        waitingQueueService.expireQueueToken(new WaitingQueueCommand.ExpireToken(token, paymentTime));
 
         Payment payment = paymentService.createPayment(new PaymentCommand.Create(reservation.getReservationId(),
                                                                                  price,

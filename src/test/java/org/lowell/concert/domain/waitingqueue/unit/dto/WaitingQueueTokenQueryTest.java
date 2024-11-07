@@ -7,7 +7,7 @@ import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class WaitingQueueQueryTest {
+class WaitingQueueTokenQueryTest {
 
     @DisplayName("대기열 조회 시 token이 없으면 예외가 발생한다.")
     @Test
@@ -17,7 +17,7 @@ class WaitingQueueQueryTest {
 
         // then
         assertThrows(DomainException.class, () -> {
-            new WaitingQueueQuery.GetQueue(token);
+            new WaitingQueueQuery.GetToken(token);
         });
     }
 

@@ -19,7 +19,7 @@ public class WaitingQueueInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String token = request.getHeader("X-Queue-Token");
-        waitingQueueFacade.checkWaitingQueueActivate(token, LocalDateTime.now());
+        waitingQueueFacade.ensureQueueTokenIsActiveAndValid(token, LocalDateTime.now());
         return true;
     }
 }

@@ -14,26 +14,21 @@ public class WaitingQueueController implements WaitingQueueApiDocs {
     private final WaitingQueueFacade waitingQueueFacade;
 
     @PostMapping("")
-    public ApiResponse<WaitingQueueResponse.QueueInfo> createQueue() {
+    public ApiResponse<WaitingQueueResponse.TokenInfo> createQueueToken() {
         WaitingQueueInfo.Get waitingQueue = waitingQueueFacade.createWaitingQueue();
-        WaitingQueueResponse.QueueInfo token = WaitingQueueResponse.QueueInfo.builder()
-                                                                             .tokenId(waitingQueue.getTokenId())
-                                                                             .token(waitingQueue.getToken())
-                                                                             .waitingQueueStatus(waitingQueue.getTokenStatus())
-                                                                             .build();
-        return ApiResponse.createOk(token);
+        return ApiResponse.createOk(WaitingQueueResponse.TokenInfo.builder()
+                                                                  .token(waitingQueue.getToken())
+                                                                  .order(waitingQueue.getOrder())
+                                                                  .build());
     }
 
     @SecurityRequirement(name = "queueToken")
     @GetMapping("/tokens")
-    public ApiResponse<WaitingQueueResponse.QueueOrderInfo> getQueueOrder(@RequestHeader("X-QUEUE-TOKEN") String token) {
-        WaitingQueueInfo.GetWithOrder waitingQueueOrder = waitingQueueFacade.getWaitingQueueOrder(token);
-        WaitingQueueResponse.QueueOrderInfo info = WaitingQueueResponse.QueueOrderInfo.builder()
-                                                                                      .tokenId(waitingQueueOrder.getWaitingQueue().getTokenId())
-                                                                                      .remainQueueCount(waitingQueueOrder.getOrder().intValue())
-                                                                                      .waitingQueueStatus(waitingQueueOrder.getWaitingQueue().getTokenStatus())
-                                                                                      .expiredDate(waitingQueueOrder.getWaitingQueue().getExpiresAt())
-                                                                                      .build();
-        return ApiResponse.createOk(info);
+    public ApiResponse<WaitingQueueResponse.TokenInfo> getQueueTokenOrder(@RequestHeader("X-QUEUE-TOKEN") String token) {
+        WaitingQueueInfo.Get order = waitingQueueFacade.getWaitingQueueOrder(token);
+        return ApiResponse.createOk(WaitingQueueResponse.TokenInfo.builder()
+                                                                  .token(order.getToken())
+                                                                  .order(order.getOrder())
+                                                                  .build());
     }
 }

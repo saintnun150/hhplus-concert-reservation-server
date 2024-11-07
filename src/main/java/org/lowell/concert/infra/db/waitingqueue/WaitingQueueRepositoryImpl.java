@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
-import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
+import org.lowell.concert.domain.waitingqueue.model.WaitingQueueToken;
+import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
@@ -20,44 +21,49 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
     private final WaitingQueueJpaRepository jpaRepository;
 
     @Override
-    public WaitingQueue createWaitingQueue(WaitingQueueCommand.Create command) {
-        WaitingQueue entity = WaitingQueue.builder()
-                                          .token(command.token())
-                                          .tokenStatus(command.status())
-                                          .createdAt(LocalDateTime.now())
-                                          .expiresAt(command.expiresAt())
-                                          .build();
+    public WaitingQueueTokenInfo createQueueToken(WaitingQueueCommand.CreateToken command) {
+        WaitingQueueToken entity = WaitingQueueToken.builder()
+                                                    .token(command.token())
+                                                    .tokenStatus(command.status())
+                                                    .createdAt(LocalDateTime.now())
+                                                    .expiresAt(command.expiresAt())
+                                                    .build();
 
-        jpaRepository.save(entity);
-        return entity;
+        WaitingQueueToken savedEntity = jpaRepository.save(entity);
+        return savedEntity.toPojo();
     }
 
     @Override
-    public Optional<WaitingQueue> getWaitingQueue(WaitingQueueQuery.GetQueue query) {
-       return jpaRepository.findByToken(query.token());
+    public Optional<WaitingQueueTokenInfo> findQueueToken(WaitingQueueQuery.GetToken query) {
+        return jpaRepository.findByToken(query.token())
+                            .map(WaitingQueueToken::toPojo);
     }
 
     @Override
-    public Long getWaitingOrder(WaitingQueueQuery.Order query) {
-        return jpaRepository.countByTokenIdLessThanEqualAndTokenStatus(query.tokenId(), query.tokenStatus());
+    public Long findWaitingTokenOrder(WaitingQueueQuery.GetOrder query) {
+        Optional<WaitingQueueToken> queueToken = jpaRepository.findByToken(query.token());
+        return queueToken.map(token -> jpaRepository.countByTokenIdLessThanEqualAndTokenStatus(token.getTokenId(),
+                                                                                               token.getTokenStatus()))
+                         .orElse(null);
     }
 
     @Override
-    public Long getActivateQueueCount(TokenStatus tokenStatus) {
+    public Long findActivateQueueTokenCount(TokenStatus tokenStatus) {
         return jpaRepository.countByTokenStatus(tokenStatus);
     }
 
     @Override
-    public List<WaitingQueue> getWaitingQueues(WaitingQueueQuery.GetQueues query) {
+    public List<WaitingQueueToken> findQueuesByStatusAndSize(WaitingQueueQuery.GetQueues query) {
         return jpaRepository.findWaitingQueuesByStatus(query.tokenStatus(),
                                                 PageRequest.of(0, (int) query.size()));
     }
 
     @Override
-    public void update(WaitingQueueCommand.Update command) {
-        jpaRepository.updateByTokenIdInAndTokenStatus(command.tokenId(),
-                                                      command.status(),
-                                                      command.updatedAt());
+    public void expireQueueToken(WaitingQueueCommand.ExpireToken command) {
+        jpaRepository.findByToken(command.token())
+                     .ifPresent(token -> jpaRepository.updateByTokenInAndTokenStatus(token.getToken(),
+                                                                                     TokenStatus.EXPIRED,
+                                                                                     command.now()));
     }
 
     @Override
