@@ -6,22 +6,24 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lowell.concert.application.waitingqueue.WaitingQueueInfo;
 import org.lowell.concert.domain.common.exception.DomainException;
-import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueueToken;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
+import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueProvider;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
 import org.lowell.concert.domain.waitingqueue.service.WaitingQueueService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -35,6 +37,13 @@ class WaitingQueueTokenServiceTest {
     @InjectMocks
     private WaitingQueueService waitingQueueService;
 
+    @Spy
+    private WaitingQueueProvider waitingQueueProvider = new WaitingQueueProvider() {
+        @Override
+        public WaitingQueueRepository getWaitingQueueRepository(String type) {
+            return waitingQueueRepository;
+        }
+    };
 
     @DisplayName("대기열 생성 테스트")
     @Test
@@ -124,7 +133,7 @@ class WaitingQueueTokenServiceTest {
     @Test
     void hasCapacityForActiveToken() {
         // given
-        when(waitingQueueRepository.findActivateQueueTokenCount(TokenStatus.ACTIVATE))
+        when(waitingQueueRepository.findTokenCount(TokenStatus.ACTIVATE))
                 .thenReturn(1L);
         // when
         boolean result = waitingQueueService.hasCapacityForActiveToken();
@@ -137,7 +146,7 @@ class WaitingQueueTokenServiceTest {
     void getQueueTokensByStatusAndSize() {
         // given
         TokenStatus status = TokenStatus.WAITING;
-        WaitingQueueQuery.GetQueues query = new WaitingQueueQuery.GetQueues(status, 1);
+        WaitingQueueQuery.GetQueues query = new WaitingQueueQuery.GetQueues(status, null, 1L);
 
         when(waitingQueueRepository.findQueuesByStatusAndSize(query))
                 .thenReturn(List.of(WaitingQueueToken.builder()
@@ -152,6 +161,20 @@ class WaitingQueueTokenServiceTest {
         List<WaitingQueueToken> waitingQueueTokens = waitingQueueService.getQueueTokensByStatusAndSize(query);
         // then
         assertThat(waitingQueueTokens).hasSize(1);
+    }
+
+    @DisplayName("특정 시간간격 T마다 N명의 사람을 입장시킨다고 할 때 주어진 token 순번 WO에 대한 남은 시간은 ((WO - 1) / N) * T이다.")
+    @Test
+    void calculateWaitingTimeSeconds() {
+        // given
+        Long order = 50L;
+        Long intervalTime = 10L;
+        Long activateCount = 2L;
+
+        // when
+        long result = waitingQueueService.calculateWaitingTimeSeconds(order, intervalTime, TimeUnit.SECONDS, activateCount);
+        // then
+        assertThat(result).isEqualTo(240L);
     }
 
 }
