@@ -23,6 +23,8 @@ import org.lowell.concert.infra.db.user.repository.UserJpaRepository;
 import org.lowell.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
@@ -55,6 +57,11 @@ public class PaymentConcurrencyTest {
     @AfterEach
     void tearDown() {
         databaseCleanUp.execute();
+    }
+
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("waiting-queue.type", () -> "db");
     }
 
     @DisplayName("같은 예약 건에 대해 결제 요청이 동시에 들어오면 하나만 성공한다.")
