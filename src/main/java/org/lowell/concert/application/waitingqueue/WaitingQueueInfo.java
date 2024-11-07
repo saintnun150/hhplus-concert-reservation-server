@@ -2,7 +2,6 @@ package org.lowell.concert.application.waitingqueue;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 
 import java.time.LocalDateTime;
@@ -16,6 +15,7 @@ public class WaitingQueueInfo {
         private final TokenStatus tokenStatus;
         private final LocalDateTime expiresAt;
         private final Long order;
+        private final Long waitingTime;
     }
 
 }

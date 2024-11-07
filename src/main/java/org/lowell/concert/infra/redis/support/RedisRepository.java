@@ -51,4 +51,8 @@ public class RedisRepository {
     public Set<ZSetOperations.TypedTuple<Object>> zPopMin(String key, long count) {
         return this.getZSetOps().popMin(key, count);
     }
+
+    public Object getValue(String key) {
+        return redisTemplate.opsForValue().get(key);
+    }
 }

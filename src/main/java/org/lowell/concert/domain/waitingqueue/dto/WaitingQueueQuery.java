@@ -17,5 +17,5 @@ public class WaitingQueueQuery {
     }
     public record GetOrder(String token, TokenStatus tokenStatus) { }
     public record CheckQueueActivation(String token, LocalDateTime now) {}
-    public record GetQueues(TokenStatus tokenStatus, long size) { }
+    public record GetQueues(TokenStatus tokenStatus, LocalDateTime expiresAt, long size) { }
 }
