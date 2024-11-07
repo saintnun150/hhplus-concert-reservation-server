@@ -12,23 +12,8 @@ public class WaitingQueueResponse {
     @Getter
     @Builder
     @AllArgsConstructor
-    public static class QueueInfo {
-        private final Long tokenId;
+    public static class TokenInfo {
         private final String token;
-        private final TokenStatus waitingQueueStatus;
+        private final Long order;
     }
-
-
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    public static class QueueOrderInfo {
-        private final Long tokenId;
-        private final int remainQueueCount;
-        private final TokenStatus waitingQueueStatus;
-        private final LocalDateTime expiredDate;
-    }
-
-
-
 }

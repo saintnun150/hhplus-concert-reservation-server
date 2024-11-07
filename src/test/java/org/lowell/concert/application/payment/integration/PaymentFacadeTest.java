@@ -17,10 +17,9 @@ import org.lowell.concert.domain.user.model.User;
 import org.lowell.concert.domain.user.model.UserAccount;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
-import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
+import org.lowell.concert.domain.waitingqueue.model.WaitingQueueToken;
 import org.lowell.concert.infra.db.concert.repository.ConcertReservationJpaRepository;
 import org.lowell.concert.infra.db.concert.repository.ConcertSeatJpaRepository;
-import org.lowell.concert.infra.db.payment.repository.PaymentJpaRepository;
 import org.lowell.concert.infra.db.user.repository.UserAccountJpaRepository;
 import org.lowell.concert.infra.db.user.repository.UserJpaRepository;
 import org.lowell.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
@@ -48,8 +47,6 @@ public class PaymentFacadeTest {
     private UserJpaRepository userJpaRepository;
     @Autowired
     private UserAccountJpaRepository userAccountJpaRepository;
-    @Autowired
-    private PaymentJpaRepository paymentJpaRepository;
 
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
@@ -202,13 +199,13 @@ public class PaymentFacadeTest {
                                                                                           .status(ReservationStatus.PENDING)
                                                                                           .build());
 
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-                                                   .tokenId(1L)
-                                                   .token("token")
-                                                   .tokenStatus(TokenStatus.ACTIVATE)
-                                                   .createdAt(LocalDateTime.now().minusMinutes(5))
-                                                   .expiresAt(LocalDateTime.now().minusMinutes(20))
-                                                   .build());
+        waitingQueueJpaRepository.save(WaitingQueueToken.builder()
+                                                        .tokenId(1L)
+                                                        .token("token")
+                                                        .tokenStatus(TokenStatus.ACTIVATE)
+                                                        .createdAt(LocalDateTime.now().minusMinutes(5))
+                                                        .expiresAt(LocalDateTime.now().minusMinutes(20))
+                                                        .build());
 
         assertThatThrownBy(() -> paymentFacade.payment(saved.getReservationId(), "token"))
                 .isInstanceOfSatisfying(DomainException.class, ex -> {

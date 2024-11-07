@@ -15,10 +15,9 @@ import org.lowell.concert.domain.concert.model.SeatStatus;
 import org.lowell.concert.domain.user.model.User;
 import org.lowell.concert.domain.user.model.UserAccount;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
-import org.lowell.concert.domain.waitingqueue.model.WaitingQueue;
+import org.lowell.concert.domain.waitingqueue.model.WaitingQueueToken;
 import org.lowell.concert.infra.db.concert.repository.ConcertReservationJpaRepository;
 import org.lowell.concert.infra.db.concert.repository.ConcertSeatJpaRepository;
-import org.lowell.concert.infra.db.payment.repository.PaymentJpaRepository;
 import org.lowell.concert.infra.db.user.repository.UserAccountJpaRepository;
 import org.lowell.concert.infra.db.user.repository.UserJpaRepository;
 import org.lowell.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
@@ -49,8 +48,6 @@ public class PaymentConcurrencyTest {
     private UserJpaRepository userJpaRepository;
     @Autowired
     private UserAccountJpaRepository userAccountJpaRepository;
-    @Autowired
-    private PaymentJpaRepository paymentJpaRepository;
 
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
@@ -76,13 +73,13 @@ public class PaymentConcurrencyTest {
                                                                        .balance(balance)
                                                                        .build());
 
-        WaitingQueue token = waitingQueueJpaRepository.save(WaitingQueue.builder()
-                                                                        .tokenId(1L)
-                                                                        .token("token")
-                                                                        .tokenStatus(TokenStatus.ACTIVATE)
-                                                                        .createdAt(LocalDateTime.now().minusMinutes(5))
-                                                                        .expiresAt(LocalDateTime.now().plusMinutes(20))
-                                                                        .build());
+        WaitingQueueToken token = waitingQueueJpaRepository.save(WaitingQueueToken.builder()
+                                                                                  .tokenId(1L)
+                                                                                  .token("token")
+                                                                                  .tokenStatus(TokenStatus.ACTIVATE)
+                                                                                  .createdAt(LocalDateTime.now().minusMinutes(5))
+                                                                                  .expiresAt(LocalDateTime.now().plusMinutes(20))
+                                                                                  .build());
 
         ConcertSeat seat = concertSeatJpaRepository.save(ConcertSeat.builder()
                                                                     .seatNo(1)

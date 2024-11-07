@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Table(name = "t_waiting_queue")
 @Getter
 @NoArgsConstructor
-public class WaitingQueue {
+public class WaitingQueueToken {
 
     @Id
     @Column(name = "id")
@@ -39,7 +39,7 @@ public class WaitingQueue {
     private LocalDateTime expiresAt;
 
     @Builder
-    public WaitingQueue(Long tokenId, String token, TokenStatus tokenStatus, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime expiresAt) {
+    public WaitingQueueToken(Long tokenId, String token, TokenStatus tokenStatus, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime expiresAt) {
         if (!StringUtils.hasText(token)) {
             throw DomainException.create(WaitingQueueError.INVALID_TOKEN_INPUT);
         }
@@ -58,36 +58,7 @@ public class WaitingQueue {
         this.expiresAt = expiresAt;
     }
 
-    public void validateWaitingStatus() {
-        if (tokenStatus != TokenStatus.WAITING) {
-            throw DomainException.create(WaitingQueueError.NOT_WAITING_STATUS);
-        }
+    public WaitingQueueTokenInfo toPojo() {
+        return new WaitingQueueTokenInfo(token, tokenStatus, expiresAt);
     }
-
-    public void validateActivateStatus() {
-        if (tokenStatus != TokenStatus.ACTIVATE) {
-            throw DomainException.create(WaitingQueueError.NOT_ACTIVATE_STATUS);
-        }
-    }
-
-    public void validateTokenExpiredDate(LocalDateTime now, long timeToLive) {
-        validateActivateStatus();
-        if (expiresAt == null || now.isAfter(expiresAt.plusMinutes(timeToLive))) {
-            throw DomainException.create(WaitingQueueError.TOKEN_EXPIRED);
-        }
-    }
-
-    public void activateToken(LocalDateTime now, long timeToLive) {
-        validateWaitingStatus();
-        tokenStatus = TokenStatus.ACTIVATE;
-        this.updatedAt = now;
-        this.expiresAt = now.plusMinutes(timeToLive);
-    }
-
-    public void expiredToken(LocalDateTime now, long timeToLive) {
-        validateTokenExpiredDate(now, timeToLive);
-        this.tokenStatus = TokenStatus.EXPIRED;
-        this.updatedAt = now;
-    }
-
 }

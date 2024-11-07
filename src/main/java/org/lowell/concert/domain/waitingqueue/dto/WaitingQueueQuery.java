@@ -8,14 +8,14 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 
 public class WaitingQueueQuery {
-    public record GetQueue(String token) {
-        public GetQueue {
+    public record GetToken(String token) {
+        public GetToken {
             if (!StringUtils.hasText(token)) {
                 throw DomainException.create(WaitingQueueError.INVALID_TOKEN_INPUT);
             }
         }
     }
-    public record Order(long tokenId, TokenStatus tokenStatus) { }
+    public record GetOrder(String token, TokenStatus tokenStatus) { }
     public record CheckQueueActivation(String token, LocalDateTime now) {}
     public record GetQueues(TokenStatus tokenStatus, long size) { }
 }
