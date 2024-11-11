@@ -31,3 +31,4 @@ logging:
       springframework:
         jdbc:
           core: TRACE
+        cache: TRACE

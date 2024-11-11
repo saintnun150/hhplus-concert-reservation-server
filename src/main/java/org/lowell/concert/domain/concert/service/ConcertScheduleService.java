@@ -7,6 +7,7 @@ import org.lowell.concert.domain.concert.dto.ConcertScheduleQuery;
 import org.lowell.concert.domain.concert.exception.ConcertScheduleError;
 import org.lowell.concert.domain.concert.model.ConcertSchedule;
 import org.lowell.concert.domain.concert.repository.ConcertScheduleRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,27 @@ public class ConcertScheduleService {
         ConcertSchedule schedule = concertScheduleRepository.getConcertSchedule(concertScheduleId)
                                                             .orElseThrow(() -> DomainException.create(ConcertScheduleError.NOT_FOUND_CONCERT_SCHEDULE, DomainException.createPayload(concertScheduleId)));
         return schedule;
+    }
+
+    @Cacheable(value = "concertSchedules", key = "#query.concertId()")
+    public List<ConcertSchedule> getConcertSchedulesWithCache(ConcertScheduleQuery.SearchList query) {
+        List<ConcertSchedule> concertDates;
+        if (query == null || (query.concertId() == null && query.scheduleDate() == null)) {
+            concertDates = concertScheduleRepository.getConcertDates();
+        } else {
+            if (query.concertId() != null && query.scheduleDate() != null) {
+                concertDates = concertScheduleRepository.getConcertDates(query.concertId(), query.scheduleDate());
+            } else if (query.concertId() != null) {
+                concertDates = concertScheduleRepository.getConcertDates(query.concertId());
+            } else {
+                concertDates = concertScheduleRepository.getConcertDates(query.scheduleDate());
+            }
+        }
+
+        if (concertDates == null) {
+            throw DomainException.create(ConcertScheduleError.NOT_FOUND_CONCERT_SCHEDULE, DomainException.createPayload(query));
+        }
+        return concertDates;
     }
 
     public List<ConcertSchedule> getConcertSchedules(ConcertScheduleQuery.SearchList query) {
