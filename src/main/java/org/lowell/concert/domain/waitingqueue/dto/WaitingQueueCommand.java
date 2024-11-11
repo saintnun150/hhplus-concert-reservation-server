@@ -8,6 +8,6 @@ import java.util.List;
 public class WaitingQueueCommand {
     public record CreateToken(String token, TokenStatus status, LocalDateTime expiresAt) {
     }
-    public record UpdateBatch(List<Long> tokenIds, TokenStatus status, LocalDateTime updatedAt, LocalDateTime expiresAt) { }
+    public record UpdateBatch(Long count) { }
     public record ExpireToken(String token, LocalDateTime now) { }
 }

@@ -1,6 +1,8 @@
 package org.lowell.concert.infra.db.waitingqueue;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
@@ -9,12 +11,13 @@ import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
@@ -48,7 +51,7 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
     }
 
     @Override
-    public Long findActivateQueueTokenCount(TokenStatus tokenStatus) {
+    public Long findTokenCount(TokenStatus tokenStatus) {
         return jpaRepository.countByTokenStatus(tokenStatus);
     }
 
@@ -67,17 +70,26 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
     }
 
     @Override
-    public void updateAll(WaitingQueueCommand.UpdateBatch command) {
-        jpaRepository.updateAllByTokenIdInAndTokenStatusAndExpiresAt(command.tokenIds(),
-                                                                     command.status(),
-                                                                     command.updatedAt(),
-                                                                     command.expiresAt());
+    public void activateWaitingToken(WaitingQueueQuery.GetQueues query) {
+        List<WaitingQueueToken> tokens = jpaRepository.findWaitingQueuesByStatus(query.tokenStatus(),
+                                                                                                PageRequest.of(0, (int) query.size()));
+        if (CollectionUtils.isEmpty(tokens)) {
+            log.info("## No waiting queues to activate");
+            return;
+        }
+
+        List<Long> tokenIds = tokens.stream()
+                                    .map(WaitingQueueToken::getTokenId)
+                                    .toList();
+        jpaRepository.updateAllByTokenIdInAndTokenStatusAndExpiresAt(tokenIds,
+                                                                     TokenStatus.ACTIVATE,
+                                                                     LocalDateTime.now(),
+                                                                     LocalDateTime.now().plusMinutes(ConcertPolicy.EXPIRED_QUEUE_MINUTES));
     }
 
-    @Transactional
     @Override
-    public void deleteAll() {
-        jpaRepository.deleteAll();
+    public boolean existsActivateToken(String token) {
+        return false;
     }
 
 }

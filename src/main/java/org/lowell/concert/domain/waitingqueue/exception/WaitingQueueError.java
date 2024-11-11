@@ -18,7 +18,10 @@ public enum WaitingQueueError implements DomainError {
     EMPTY_TOKENS(ErrorCode.BAD_REQUEST,  "Tokens is empty", LogLevel.DEBUG),
     EMPTY_TOKEN_IDS(ErrorCode.BAD_REQUEST,  "Token IDs is empty", LogLevel.DEBUG),
     INVALID_TOKEN_EXPIRES_DATE(ErrorCode.VALIDATION,  "Token expires date is unspecified value", LogLevel.WARN),
-    EMPTY_TOKEN_ID(ErrorCode.BAD_REQUEST,  "Token id is not exist", LogLevel.DEBUG),;
+    EMPTY_TOKEN_ID(ErrorCode.BAD_REQUEST,  "Token id is not exist", LogLevel.DEBUG),
+    FAILED_CREATE_QUEUE(ErrorCode.INTERNAL_SERVER,  "Failed to create queue", LogLevel.ERROR),
+    FAILED_CREATE_DUPLICATE_QUEUE(ErrorCode.BAD_REQUEST,  "Failed to create duplicate queue", LogLevel.WARN),
+    ;
 
     private final ErrorCode code;
     private final String message;

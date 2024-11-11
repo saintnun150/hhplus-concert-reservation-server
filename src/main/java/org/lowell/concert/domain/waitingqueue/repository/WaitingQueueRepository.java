@@ -13,9 +13,9 @@ public interface WaitingQueueRepository {
     WaitingQueueTokenInfo createQueueToken(WaitingQueueCommand.CreateToken command);
     Optional<WaitingQueueTokenInfo> findQueueToken(WaitingQueueQuery.GetToken query);
     Long findWaitingTokenOrder(WaitingQueueQuery.GetOrder query);
-    Long findActivateQueueTokenCount(TokenStatus tokenStatus);
+    Long findTokenCount(TokenStatus tokenStatus);
     List<WaitingQueueToken> findQueuesByStatusAndSize(WaitingQueueQuery.GetQueues query);
     void expireQueueToken(WaitingQueueCommand.ExpireToken command);
-    void updateAll(WaitingQueueCommand.UpdateBatch command);
-    void deleteAll();
+    void activateWaitingToken(WaitingQueueQuery.GetQueues query);
+    boolean existsActivateToken(String token);
 }

@@ -14,11 +14,11 @@ public class RedisSimpleLockManager implements LockManager {
     @Override
     public Boolean tryLock(String lockKey, Long waitTime, Long leaseTime, TimeUnit timeUnit) {
         long lockValue = System.currentTimeMillis() + timeUnit.toMillis(waitTime);
-        return redisRepository.setIfAbsent(lockKey, Long.toString(lockValue), leaseTime, timeUnit);
+        return redisRepository.addIfAbsent(lockKey, Long.toString(lockValue), leaseTime, timeUnit);
     }
 
     @Override
     public void unlock(String lockKey) {
-        redisRepository.delete(lockKey);
+        redisRepository.deleteKey(lockKey);
     }
 }

@@ -25,6 +25,8 @@ import org.lowell.concert.infra.db.user.repository.UserJpaRepository;
 import org.lowell.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.logging.Logger;
@@ -50,6 +52,11 @@ public class PaymentFacadeTest {
 
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
+
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("waiting-queue.type", () -> "db");
+    }
 
     @AfterEach
     void tearDown() {

@@ -34,6 +34,7 @@ public class WaitingQueueFacade {
         return new WaitingQueueInfo.Get(queueTokenInfo.getToken(),
                                         queueTokenInfo.getTokenStatus(),
                                         queueTokenInfo.getExpiresAt(),
+                                        queueTokenInfo.getTokenStatus() == TokenStatus.ACTIVATE ? 0L : null,
                                         queueTokenInfo.getTokenStatus() == TokenStatus.ACTIVATE ? 0L : null);
     }
 
@@ -42,13 +43,8 @@ public class WaitingQueueFacade {
     }
 
     @Transactional
-    public void activateReadyWaitingQueues() {
-        LocalDateTime now = LocalDateTime.now();
-        waitingQueueService.activateWaitingToken(
-                new WaitingQueueCommand.UpdateBatch(null,
-                                                    TokenStatus.ACTIVATE,
-                                                    now,
-                                                    now.plusMinutes(ConcertPolicy.EXPIRED_QUEUE_MINUTES)));
+    public void activateReadyWaitingQueues(WaitingQueueQuery.GetQueues query) {
+        waitingQueueService.activateWaitingToken(query);
     }
 
     public void ensureQueueTokenIsActiveAndValid(String token, LocalDateTime now) {

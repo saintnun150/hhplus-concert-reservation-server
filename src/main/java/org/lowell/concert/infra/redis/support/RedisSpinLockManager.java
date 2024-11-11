@@ -18,7 +18,7 @@ public class RedisSpinLockManager implements LockManager {
     public Boolean tryLock(String lockKey, Long waitTime, Long leaseTime, TimeUnit timeUnit) {
         long retryTime = System.currentTimeMillis() + timeUnit.toMillis(waitTime);
         while (true) {
-            if (redisRepository.setIfAbsent(lockKey, "", leaseTime, timeUnit)) {
+            if (redisRepository.addIfAbsent(lockKey, "", leaseTime, timeUnit)) {
                 return true;
             }
             try {
@@ -33,6 +33,6 @@ public class RedisSpinLockManager implements LockManager {
 
     @Override
     public void unlock(String lockKey) {
-        redisRepository.delete(lockKey);
+        redisRepository.deleteKey(lockKey);
     }
 }
