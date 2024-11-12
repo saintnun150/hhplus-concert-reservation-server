@@ -71,8 +71,9 @@ public class WaitingQueueService {
     }
 
     // 대기열 활성화
-    public void activateWaitingToken(WaitingQueueQuery.GetQueues query) {
-        queueRepository.activateWaitingToken(query);
+    public void activateWaitingToken() {
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(ConcertPolicy.EXPIRED_QUEUE_MINUTES);
+        queueRepository.activateWaitingToken(new WaitingQueueQuery.GetQueues(ConcertPolicy.ACTIVATE_QUEUE_SIZE, expiresAt));
     }
 
     // 참가열 체크

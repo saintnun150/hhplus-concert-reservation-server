@@ -33,8 +33,8 @@ public class WaitingQueueFacade {
     }
 
     @Transactional
-    public void activateReadyWaitingQueues(WaitingQueueQuery.GetQueues query) {
-        waitingQueueService.activateWaitingToken(query);
+    public void activateReadyWaitingQueues() {
+        waitingQueueService.activateWaitingToken();
     }
 
     public void checkActivateToken(String token) {
