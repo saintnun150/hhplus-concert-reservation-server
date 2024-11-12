@@ -1,5 +1,6 @@
 package org.lowell.concert.domain.waitingqueue.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lowell.concert.application.waitingqueue.WaitingQueueInfo;
 import org.lowell.concert.domain.common.exception.DomainException;
@@ -7,102 +8,81 @@ import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
-import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
-import org.lowell.concert.domain.waitingqueue.model.WaitingQueueToken;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
-import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueProvider;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class WaitingQueueService {
     private final WaitingQueueRepository queueRepository;
 
-    public WaitingQueueService(WaitingQueueProvider waitingQueueProvider, @Value("${waiting-queue.type:redis}") String type) {
-        this.queueRepository = waitingQueueProvider.getWaitingQueueRepository(type);
-    }
-
-    @Transactional
-    public WaitingQueueTokenInfo createQueueToken(WaitingQueueCommand.CreateToken command) {
+    // 대기열 토큰생성
+    public WaitingQueueTokenInfo createQueueToken(WaitingQueueCommand.Create command) {
         return queueRepository.createQueueToken(command);
     }
 
-    public WaitingQueueTokenInfo getQueueToken(WaitingQueueQuery.GetToken query) {
-        return queueRepository.findQueueToken(query)
+    // 대기열 토큰조회
+    public WaitingQueueTokenInfo getWaitingQueueToken(WaitingQueueQuery.GetToken query) {
+        return queueRepository.findWaitingQueueToken(query)
                               .orElseThrow(() -> DomainException.create(WaitingQueueError.NOT_FOUND_TOKEN));
     }
 
-    public WaitingQueueInfo.Get getQueueTokenOrder(WaitingQueueQuery.GetToken query) {
-        WaitingQueueTokenInfo queueTokenInfo = getQueueToken(query);
-        if (queueTokenInfo.isActivateToken(LocalDateTime.now(), ConcertPolicy.EXPIRED_QUEUE_MINUTES)) {
-            return new WaitingQueueInfo.Get(queueTokenInfo.getToken(),
-                                           queueTokenInfo.getTokenStatus(),
-                                           queueTokenInfo.getExpiresAt(),
-                                           0L, 0L);
-        }
-        Long order = queueRepository.findWaitingTokenOrder(new WaitingQueueQuery.GetOrder(queueTokenInfo.getToken(),
-                                                                                          TokenStatus.WAITING));
-        if (order == null) {
-            throw DomainException.create(WaitingQueueError.NOT_WAITING_STATUS);
-        }
-        long waitingTime = calculateWaitingTimeSeconds(order,
-                                                      ConcertPolicy.ACTIVATE_QUEUE_INTERVAL,
-                                                      ConcertPolicy.ACTIVATE_QUEUE_TIME_UNIT,
-                                                      ConcertPolicy.ACTIVATE_QUEUE_SIZE);
-
-
-        return new WaitingQueueInfo.Get(queueTokenInfo.getToken(),
-                                        queueTokenInfo.getTokenStatus(),
-                                        queueTokenInfo.getExpiresAt(),
-                                        order,
-                                        waitingTime);
+    // 참가열 토큰조회
+    public WaitingQueueTokenInfo getActivateQueueToken(WaitingQueueQuery.GetToken query) {
+        return queueRepository.findActivateQueueToken(query)
+                              .orElseThrow(() -> DomainException.create(WaitingQueueError.NOT_FOUND_TOKEN));
     }
 
+    // 대기열 순서 조회
+    public WaitingQueueInfo.Get getQueueTokenOrder(WaitingQueueQuery.GetToken query) {
+        Long order = queueRepository.findWaitingTokenOrder(query);
+        if (order == null) {
+            return processActivateToken(query);
+        }
+        return processWaitingToken(query.token(), order);
+    }
+
+    private WaitingQueueInfo.Get processActivateToken(WaitingQueueQuery.GetToken query) {
+        WaitingQueueTokenInfo tokenInfo = getActivateQueueToken(query);
+        tokenInfo.isExpiredTokenStatus(LocalDateTime.now());
+        return WaitingQueueInfo.Get.ActivateOrder(tokenInfo.getToken(), tokenInfo.getExpiresAt());
+    }
+
+    private WaitingQueueInfo.Get processWaitingToken(String token, Long order) {
+        Long waitingTime = calculateWaitingTimeSeconds(
+                order,
+                ConcertPolicy.ACTIVATE_QUEUE_INTERVAL,
+                ConcertPolicy.ACTIVATE_QUEUE_TIME_UNIT,
+                ConcertPolicy.ACTIVATE_QUEUE_SIZE
+        );
+        return WaitingQueueInfo.Get.WaitingOrder(token, order, waitingTime);
+    }
+
+    // 대기열 남은 시간 조회
     public long calculateWaitingTimeSeconds(Long order, Long intervalTime, TimeUnit unit, Long activateCount) {
         long intervalInSeconds = unit.toSeconds(intervalTime);
         long remainingIntervals = (order - 1) / activateCount;
         return remainingIntervals * intervalInSeconds;
     }
 
-    public boolean hasCapacityForActiveToken() {
-        Long activeCount = queueRepository.findTokenCount(TokenStatus.ACTIVATE);
-        if (activeCount == null || activeCount == 0) {
-            return true;
-        }
-        return activeCount < ConcertPolicy.ACTIVATE_QUEUE_CAPACITY;
-    }
-
-    public List<WaitingQueueToken> getQueueTokensByStatusAndSize(WaitingQueueQuery.GetQueues query) {
-        return queueRepository.findQueuesByStatusAndSize(query);
-    }
-
-    public int countReadyToActivateToken() {
-        Long activateQueueCount = queueRepository.findTokenCount(TokenStatus.ACTIVATE);
-        if (activateQueueCount == null || activateQueueCount == 0) {
-            return ConcertPolicy.ACTIVATE_QUEUE_CAPACITY;
-        }
-        return ConcertPolicy.ACTIVATE_QUEUE_CAPACITY - activateQueueCount.intValue();
-    }
-
+    // 대기열 활성화
     public void activateWaitingToken(WaitingQueueQuery.GetQueues query) {
         queueRepository.activateWaitingToken(query);
     }
 
-    public void ensureQueueTokenIsActiveAndValid(WaitingQueueQuery.CheckQueueActivation query) {
-        WaitingQueueTokenInfo queueTokenInfo = getQueueToken(new WaitingQueueQuery.GetToken(query.token()));
-        queueTokenInfo.validateTokenIsActiveAndNotExpired(query.now(), ConcertPolicy.EXPIRED_QUEUE_MINUTES);
+    // 참가열 체크
+    public void checkActivateToken(WaitingQueueQuery.GetToken query) {
+        WaitingQueueTokenInfo tokenInfo = getActivateQueueToken(query);
+        tokenInfo.checkActivateToken(LocalDateTime.now());
     }
 
+    // 대기열 만료 처리
     public void expireQueueToken(WaitingQueueCommand.ExpireToken command) {
-        WaitingQueueTokenInfo queueTokenInfo = getQueueToken(new WaitingQueueQuery.GetToken(command.token()));
-        queueTokenInfo.validateTokenIsActiveAndNotExpired(LocalDateTime.now(), ConcertPolicy.EXPIRED_QUEUE_MINUTES);
         queueRepository.expireQueueToken(command);
     }
 }

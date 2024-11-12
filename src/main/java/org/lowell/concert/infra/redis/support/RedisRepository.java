@@ -55,4 +55,8 @@ public class RedisRepository {
     public Object getValue(String key) {
         return redisTemplate.opsForValue().get(key);
     }
+
+    public Double getZScore(String key, Object value) {
+        return redisTemplate.opsForZSet().score(key, value);
+    }
 }

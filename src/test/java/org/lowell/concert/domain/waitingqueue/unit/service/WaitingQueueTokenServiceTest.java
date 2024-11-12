@@ -10,18 +10,14 @@ import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
-import org.lowell.concert.domain.waitingqueue.model.WaitingQueueToken;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
-import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueProvider;
 import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
 import org.lowell.concert.domain.waitingqueue.service.WaitingQueueService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -37,26 +33,18 @@ class WaitingQueueTokenServiceTest {
     @InjectMocks
     private WaitingQueueService waitingQueueService;
 
-    @Spy
-    private WaitingQueueProvider waitingQueueProvider = new WaitingQueueProvider() {
-        @Override
-        public WaitingQueueRepository getWaitingQueueRepository(String type) {
-            return waitingQueueRepository;
-        }
-    };
-
     @DisplayName("대기열 생성 테스트")
     @Test
     void createWaitingQueue() {
         // given
         String token = "token";
         TokenStatus status = TokenStatus.WAITING;
-        WaitingQueueCommand.CreateToken createToken = new WaitingQueueCommand.CreateToken(token, status, null);
+        WaitingQueueCommand.Create create = new WaitingQueueCommand.Create(token);
 
-        when(waitingQueueRepository.createQueueToken(createToken))
+        when(waitingQueueRepository.createQueueToken(create))
                 .thenReturn(new WaitingQueueTokenInfo(token, status, LocalDateTime.now()));
         // when
-        WaitingQueueTokenInfo waitingQueueToken = waitingQueueService.createQueueToken(createToken);
+        WaitingQueueTokenInfo waitingQueueToken = waitingQueueService.createQueueToken(create);
         // then
         assertThat(waitingQueueToken.getToken()).isEqualTo(token);
     }
@@ -68,10 +56,10 @@ class WaitingQueueTokenServiceTest {
         String token = "token";
         WaitingQueueQuery.GetToken query = new WaitingQueueQuery.GetToken(token);
 
-        when(waitingQueueRepository.findQueueToken(query))
+        when(waitingQueueRepository.findWaitingQueueToken(query))
                 .thenThrow(DomainException.create(WaitingQueueError.NOT_FOUND_TOKEN));
         // then
-        Assertions.assertThatThrownBy(() -> waitingQueueService.getQueueToken(query))
+        Assertions.assertThatThrownBy(() -> waitingQueueService.getWaitingQueueToken(query))
                   .isInstanceOfSatisfying(DomainException.class, e -> {
                       assertThat(e.getDomainError()).isEqualTo(WaitingQueueError.NOT_FOUND_TOKEN);
                   });
@@ -86,7 +74,8 @@ class WaitingQueueTokenServiceTest {
         WaitingQueueTokenInfo queueTokenInfo = new WaitingQueueTokenInfo("token", status, LocalDateTime.now().plusMinutes(5));
 
         // when
-        when(waitingQueueRepository.findQueueToken(query)).thenReturn(Optional.of(queueTokenInfo));
+        when(waitingQueueRepository.findWaitingTokenOrder(query)).thenReturn(null);
+        when(waitingQueueRepository.findActivateQueueToken(query)).thenReturn(Optional.of(queueTokenInfo));
 
         // then
         WaitingQueueInfo.Get queueTokenOrder = waitingQueueService.getQueueTokenOrder(query);
@@ -101,7 +90,8 @@ class WaitingQueueTokenServiceTest {
         WaitingQueueQuery.GetToken query = new WaitingQueueQuery.GetToken("token");
         WaitingQueueTokenInfo queueTokenInfo = new WaitingQueueTokenInfo("token", status, LocalDateTime.now().minusMinutes(10));
 
-        when(waitingQueueRepository.findQueueToken(query)).thenReturn(Optional.of(queueTokenInfo));
+        when(waitingQueueRepository.findWaitingTokenOrder(query)).thenReturn(null);
+        when(waitingQueueRepository.findActivateQueueToken(query)).thenReturn(Optional.of(queueTokenInfo));
 
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.getQueueTokenOrder(query))
@@ -110,7 +100,7 @@ class WaitingQueueTokenServiceTest {
                   });
     }
 
-    @DisplayName("대기열 순번 조회 시 대기열에도 없고 토큰 상태가 만료상태면 예외가 발생한다.")
+    @DisplayName("대기열 순번 조회 시 대기열에도 없고 참가열에도 없으면 예외가 발생한다.")
     @Test
     void throwExceptionWhenOrderIsNull() {
         // given
@@ -118,49 +108,15 @@ class WaitingQueueTokenServiceTest {
         WaitingQueueQuery.GetToken query = new WaitingQueueQuery.GetToken("token");
         WaitingQueueTokenInfo queueTokenInfo = new WaitingQueueTokenInfo("token", status, LocalDateTime.now().minusMinutes(10));
 
-        when(waitingQueueRepository.findQueueToken(query)).thenReturn(Optional.of(queueTokenInfo));
-        when(waitingQueueRepository.findWaitingTokenOrder(new WaitingQueueQuery.GetOrder(queueTokenInfo.getToken(), TokenStatus.WAITING)))
+        when(waitingQueueRepository.findWaitingTokenOrder(new WaitingQueueQuery.GetToken(queueTokenInfo.getToken())))
                 .thenReturn(null);
+        when(waitingQueueRepository.findActivateQueueToken(query)).thenReturn(Optional.empty());
 
         // then
         Assertions.assertThatThrownBy(() -> waitingQueueService.getQueueTokenOrder(query))
                   .isInstanceOfSatisfying(DomainException.class, e -> {
-                      assertThat(e.getDomainError()).isEqualTo(WaitingQueueError.NOT_WAITING_STATUS);
+                      assertThat(e.getDomainError()).isEqualTo(WaitingQueueError.NOT_FOUND_TOKEN);
                   });
-    }
-
-    @DisplayName("대기열 활성화 큐 생성 가능 여부 테스트")
-    @Test
-    void hasCapacityForActiveToken() {
-        // given
-        when(waitingQueueRepository.findTokenCount(TokenStatus.ACTIVATE))
-                .thenReturn(1L);
-        // when
-        boolean result = waitingQueueService.hasCapacityForActiveToken();
-        // then
-        assertThat(result).isTrue();
-    }
-
-    @DisplayName("상태에 따른 대기열 조회 테스트")
-    @Test
-    void getQueueTokensByStatusAndSize() {
-        // given
-        TokenStatus status = TokenStatus.WAITING;
-        WaitingQueueQuery.GetQueues query = new WaitingQueueQuery.GetQueues(status, null, 1L);
-
-        when(waitingQueueRepository.findQueuesByStatusAndSize(query))
-                .thenReturn(List.of(WaitingQueueToken.builder()
-                                                     .tokenId(1L)
-                                                     .token("token")
-                                                     .tokenStatus(status)
-                                                     .createdAt(LocalDateTime.now())
-                                                     .updatedAt(null)
-                                                     .expiresAt(null)
-                                                     .build()));
-        // when
-        List<WaitingQueueToken> waitingQueueTokens = waitingQueueService.getQueueTokensByStatusAndSize(query);
-        // then
-        assertThat(waitingQueueTokens).hasSize(1);
     }
 
     @DisplayName("특정 시간간격 T마다 N명의 사람을 입장시킨다고 할 때 주어진 token 순번 WO에 대한 남은 시간은 ((WO - 1) / N) * T이다.")
