@@ -2,6 +2,7 @@ package org.lowell.concert.infra.db.concert.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.lowell.concert.domain.concert.dto.ConcertScheduleCommand;
+import org.lowell.concert.domain.concert.dto.ConcertScheduleQuery;
 import org.lowell.concert.domain.concert.model.ConcertSchedule;
 import org.lowell.concert.domain.concert.repository.ConcertScheduleRepository;
 import org.springframework.stereotype.Repository;
@@ -18,7 +19,7 @@ public class ConcertScheduleRepositoryImpl implements ConcertScheduleRepository 
 
     @Override
     @Transactional
-    public void createConcertDate(ConcertScheduleCommand.Create command) {
+    public void createConcertSchedule(ConcertScheduleCommand.Create command) {
         ConcertSchedule entity = ConcertSchedule.builder()
                                                 .concertId(command.concertId())
                                                 .scheduleDate(command.scheduleDate())
@@ -35,22 +36,21 @@ public class ConcertScheduleRepositoryImpl implements ConcertScheduleRepository 
     }
 
     @Override
-    public List<ConcertSchedule> getConcertDates() {
-        return jpaRepository.findAllByDeletedAtIsNull();
+    public List<ConcertSchedule> getConcertSchedules(ConcertScheduleQuery.SearchList query) {
+        boolean hasConcertId = query.concertId() != null;
+        boolean hasFromAndTo = query.from() != null && query.to() != null;
+
+        if (hasConcertId && hasFromAndTo) {
+            return jpaRepository.findAllByConcertIdAndScheduleDateBetween(query.concertId(), query.from(), query.to());
+        }
+        if (hasConcertId) {
+            return jpaRepository.findAllByConcertId(query.concertId());
+        }
+        if (hasFromAndTo) {
+            return jpaRepository.findAllByScheduleDateBetween(query.from(), query.to());
+        }
+        return jpaRepository.findAll();
     }
 
-    @Override
-    public List<ConcertSchedule> getConcertDates(long concertId) {
-        return jpaRepository.findAllByConcertIdAndDeletedAtIsNull(concertId);
-    }
 
-    @Override
-    public List<ConcertSchedule> getConcertDates(LocalDateTime scheduleDate) {
-        return jpaRepository.findAllByScheduleDateAndDeletedAtIsNull(scheduleDate);
-    }
-
-    @Override
-    public List<ConcertSchedule> getConcertDates(long concertId, LocalDateTime concertDate) {
-        return jpaRepository.findAllByConcertIdAndScheduleDateAndDeletedAtIsNull(concertId, concertDate);
-    }
 }

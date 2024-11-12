@@ -3,6 +3,7 @@ package org.lowell.concert.application.concert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lowell.concert.domain.concert.ConcertPolicy;
+import org.lowell.concert.domain.concert.dto.ConcertQuery;
 import org.lowell.concert.domain.concert.dto.ConcertReservationCommand;
 import org.lowell.concert.domain.concert.dto.ConcertScheduleQuery;
 import org.lowell.concert.domain.concert.dto.ConcertSeatQuery;
@@ -33,35 +34,36 @@ public class ConcertFacade {
 
     private final UserService userService;
 
-    public List<ConcertInfo.ScheduleInfo> getConcertSchedule(Long concertId, LocalDateTime scheduleDate) {
+    public List<ConcertInfo.Info> getConcerts(String concertName, LocalDateTime from, LocalDateTime to) {
+        return concertService.getConcerts(new ConcertQuery.SearchList(concertName, from, to))
+                             .stream()
+                             .map(concert -> ConcertInfo.Info.of(concert.getConcertId(), concert.getName(), concert.getOpenedAt()))
+                             .toList();
+    }
+
+    public List<ConcertInfo.ScheduleInfo> getConcertSchedule(Long concertId, LocalDateTime from, LocalDateTime to) {
         Concert concert = concertService.getConcert(concertId);
-        List<ConcertSchedule> concertSchedules = concertScheduleService.getConcertSchedules(new ConcertScheduleQuery.SearchList(concert.getConcertId(), scheduleDate));
-        List<ConcertInfo.ScheduleInfo> scheduleInfoList =
-                concertSchedules.stream()
-                                .map(schedule -> new ConcertInfo.ScheduleInfo(schedule.getScheduleId(),
-                                                                              schedule.getConcertId(),
-                                                                              schedule.getScheduleDate(),
-                                                                              schedule.getBeginTime(),
-                                                                              schedule.getEndTime(),
-                                                                              schedule.getCreatedAt()))
-
-
-                                .toList();
-        return scheduleInfoList;
+        List<ConcertSchedule> concertSchedules = concertScheduleService.getConcertSchedules(new ConcertScheduleQuery.SearchList(concert.getConcertId(), from, to));
+        return concertSchedules.stream()
+                               .map(schedule -> ConcertInfo.ScheduleInfo.of(schedule.getScheduleId(),
+                                                                            schedule.getConcertId(),
+                                                                            schedule.getScheduleDate(),
+                                                                            schedule.getBeginTime(),
+                                                                            schedule.getEndTime(),
+                                                                            schedule.getCreatedAt()))
+                               .toList();
     }
 
     public List<ConcertInfo.SeatInfo> getAvailableConcertSeats(Long concertScheduleId, LocalDateTime now) {
         ConcertSchedule schedule = concertScheduleService.getConcertSchedule(concertScheduleId);
         List<ConcertSeat> availableSeats = concertSeatService.getAvailableSeats(new ConcertSeatQuery.SearchList(schedule.getScheduleId(), now));
-        List<ConcertInfo.SeatInfo> seatInfoList =
-                availableSeats.stream()
-                              .map(seat -> new ConcertInfo.SeatInfo(seat.getSeatId(),
-                                                                    seat.getConcertScheduleId(),
-                                                                    seat.getSeatNo(),
-                                                                    seat.getStatus(),
-                                                                    seat.getPrice()))
-                              .toList();
-        return seatInfoList;
+        return availableSeats.stream()
+                             .map(seat -> ConcertInfo.SeatInfo.of(seat.getSeatId(),
+                                                                  seat.getConcertScheduleId(),
+                                                                  seat.getSeatNo(),
+                                                                  seat.getStatus(),
+                                                                  seat.getPrice()))
+                             .toList();
     }
 
     @Transactional
@@ -73,11 +75,11 @@ public class ConcertFacade {
 
         ConcertReservation reservation = concertReservationService.createConcertReservation(new ConcertReservationCommand.Create(seat.getSeatId(),
                                                                                                                                  user.getUserId()));
-        return new ConcertInfo.ReservationInfo(reservation.getReservationId(),
-                                               seat.getSeatNo(),
-                                               user.getUserId(),
-                                               reservation.getStatus(),
-                                               reservation.getCreatedAt());
+        return ConcertInfo.ReservationInfo.of(reservation.getReservationId(),
+                                              seat.getSeatNo(),
+                                              user.getUserId(),
+                                              reservation.getStatus(),
+                                              reservation.getCreatedAt());
     }
 
 

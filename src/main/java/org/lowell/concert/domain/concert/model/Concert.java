@@ -1,7 +1,7 @@
 package org.lowell.concert.domain.concert.model;
 
 import jakarta.persistence.*;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "t_concert")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Concert {
 
     @Id
@@ -21,6 +22,9 @@ public class Concert {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "opened_at")
+    private LocalDateTime openedAt;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -29,13 +33,4 @@ public class Concert {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @Builder
-    public Concert(Long concertId, String name, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
-        this.concertId = concertId;
-        this.name = name;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.deletedAt = deletedAt;
-    }
 }

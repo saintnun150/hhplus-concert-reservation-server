@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -44,15 +45,12 @@ class ConcertScheduleServiceTest {
                 });
     }
 
-    @DisplayName("콘서트 날짜 조회결과가 없으면 예외가 발생한다.")
+    @DisplayName("콘서트 날짜 조회결과가 없으면 빈 배열을 반환한다.")
     @Test
     void throwException_when_empty_concert_date() {
-        ConcertScheduleQuery.SearchList query = new ConcertScheduleQuery.SearchList(1L, LocalDateTime.now());
-        when(concertScheduleRepository.getConcertDates(query.concertId(), query.scheduleDate())).thenReturn(null);
-        assertThatThrownBy(() -> concertScheduleService.getConcertSchedules(query))
-                .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getDomainError()).isEqualTo(ConcertScheduleError.NOT_FOUND_CONCERT_SCHEDULE);
-                });
+        ConcertScheduleQuery.SearchList query = new ConcertScheduleQuery.SearchList(1L, LocalDateTime.now(), LocalDateTime.now());
+        when(concertScheduleRepository.getConcertSchedules(query)).thenReturn(Collections.emptyList());
+        concertScheduleService.getConcertSchedules(query);
     }
 
 }

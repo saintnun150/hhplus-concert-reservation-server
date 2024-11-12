@@ -7,9 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ConcertScheduleJpaRepository extends JpaRepository<ConcertSchedule, Long> {
-    List<ConcertSchedule> findAllByDeletedAtIsNull();
-    List<ConcertSchedule> findAllByConcertIdAndDeletedAtIsNull(long concertId);
-    List<ConcertSchedule> findAllByScheduleDateAndDeletedAtIsNull(LocalDateTime scheduleDate);
-    List<ConcertSchedule> findAllByConcertIdAndScheduleDateAndDeletedAtIsNull(long concertId, LocalDateTime scheduleDate);
-
+    List<ConcertSchedule> findAllByConcertId(Long concertId);
+    List<ConcertSchedule> findAllByConcertIdAndScheduleDateBetween(Long concertId, LocalDateTime from, LocalDateTime to);
+    List<ConcertSchedule> findAllByScheduleDateBetween(LocalDateTime from, LocalDateTime to);
 }

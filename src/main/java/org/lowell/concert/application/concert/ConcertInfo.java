@@ -1,42 +1,32 @@
 package org.lowell.concert.application.concert;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.lowell.concert.domain.concert.model.ReservationStatus;
 import org.lowell.concert.domain.concert.model.SeatStatus;
 
 import java.time.LocalDateTime;
 
 public class ConcertInfo {
-
-    @Getter
-    @RequiredArgsConstructor
-    public static class ScheduleInfo {
-        private final Long scheduleId;
-        private final Long concertId;
-        private final LocalDateTime scheduleDate;
-        private final LocalDateTime beginTime;
-        private final LocalDateTime endTime;
-        private final LocalDateTime createdAt;
+    public record Info(Long concertId, String name, LocalDateTime openedAt) {
+        public static Info of(Long concertId, String name, LocalDateTime openedAt) {
+            return new Info(concertId, name, openedAt);
+        }
     }
 
-    @Getter
-    @RequiredArgsConstructor
-    public static class SeatInfo {
-        private final Long seatId;
-        private final Long concertScheduleId;
-        private final int seatNo;
-        private final SeatStatus status;
-        private final long price;
+    public record ScheduleInfo(Long scheduleId, Long concertId, LocalDateTime scheduleDate, LocalDateTime beginTime, LocalDateTime endTime, LocalDateTime createdAt) {
+        public static ScheduleInfo of(Long scheduleId, Long concertId, LocalDateTime scheduleDate, LocalDateTime beginTime, LocalDateTime endTime, LocalDateTime createdAt) {
+            return new ScheduleInfo(scheduleId, concertId, scheduleDate, beginTime, endTime, createdAt);
+        }
     }
 
-    @Getter
-    @RequiredArgsConstructor
-    public static class ReservationInfo {
-        private final Long reservationId;
-        private final int seatNo;
-        private final Long userId;
-        private final ReservationStatus status;
-        private final LocalDateTime createdAt;
+    public record SeatInfo(Long seatId, Long concertScheduleId, int seatNo, SeatStatus status, long price) {
+        public static SeatInfo of(Long seatId, Long concertScheduleId, int seatNo, SeatStatus status, long price) {
+            return new SeatInfo(seatId, concertScheduleId, seatNo, status, price);
+        }
+    }
+
+    public record ReservationInfo(Long reservationId, int seatNo, Long userId, ReservationStatus status, LocalDateTime createdAt) {
+        public static ReservationInfo of(Long reservationId, int seatNo, Long userId, ReservationStatus status, LocalDateTime createdAt) {
+            return new ReservationInfo(reservationId, seatNo, userId, status, createdAt);
+        }
     }
 }
