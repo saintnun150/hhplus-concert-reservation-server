@@ -1,7 +1,6 @@
 package org.lowell.concert.application.waitingqueue;
 
 import lombok.RequiredArgsConstructor;
-import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
@@ -20,22 +19,13 @@ public class WaitingQueueFacade {
 
     public WaitingQueueInfo.Get createWaitingQueue() {
         String token = UUID.randomUUID().toString();
-        TokenStatus status = TokenStatus.WAITING;
-        LocalDateTime expiresAt = null;
-        boolean activationQueueImmediately = waitingQueueService.hasCapacityForActiveToken();
-        if (activationQueueImmediately) {
-            status = TokenStatus.ACTIVATE;
-            expiresAt = LocalDateTime.now().plusMinutes(10);
-        }
-
-        WaitingQueueCommand.CreateToken command = new WaitingQueueCommand.CreateToken(token, status, expiresAt);
-        WaitingQueueTokenInfo queueTokenInfo = waitingQueueService.createQueueToken(command);
-
-        return new WaitingQueueInfo.Get(queueTokenInfo.getToken(),
-                                        queueTokenInfo.getTokenStatus(),
-                                        queueTokenInfo.getExpiresAt(),
-                                        queueTokenInfo.getTokenStatus() == TokenStatus.ACTIVATE ? 0L : null,
-                                        queueTokenInfo.getTokenStatus() == TokenStatus.ACTIVATE ? 0L : null);
+        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token);
+        WaitingQueueTokenInfo tokenInfo = waitingQueueService.createQueueToken(command);
+        return new WaitingQueueInfo.Get(tokenInfo.getToken(),
+                                        tokenInfo.getTokenStatus(),
+                                        tokenInfo.getExpiresAt(),
+                                        tokenInfo.getTokenStatus() == TokenStatus.ACTIVATE ? 0L : null,
+                                        tokenInfo.getTokenStatus() == TokenStatus.ACTIVATE ? 0L : null);
     }
 
     public WaitingQueueInfo.Get getWaitingQueueOrder(String token) {
@@ -47,7 +37,7 @@ public class WaitingQueueFacade {
         waitingQueueService.activateWaitingToken(query);
     }
 
-    public void ensureQueueTokenIsActiveAndValid(String token, LocalDateTime now) {
-        waitingQueueService.ensureQueueTokenIsActiveAndValid(new WaitingQueueQuery.CheckQueueActivation(token, now));
+    public void checkActivateToken(String token) {
+        waitingQueueService.checkActivateToken(new WaitingQueueQuery.GetToken(token));
     }
 }

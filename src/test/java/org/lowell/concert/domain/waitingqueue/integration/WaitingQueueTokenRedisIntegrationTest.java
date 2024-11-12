@@ -5,12 +5,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.lowell.concert.application.support.DatabaseCleanUp;
-import org.lowell.concert.domain.common.exception.DomainException;
 import org.lowell.concert.domain.common.util.UUIDGenerator;
 import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
-import org.lowell.concert.domain.waitingqueue.exception.WaitingQueueError;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
 import org.lowell.concert.domain.waitingqueue.service.WaitingQueueService;
@@ -23,7 +21,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Slf4j
 @SpringBootTest
@@ -53,7 +50,7 @@ public class WaitingQueueTokenRedisIntegrationTest {
     void createWaitingQueue() {
         // given
         String token = UUIDGenerator.generateTimestampUUID();
-        WaitingQueueCommand.CreateToken command = new WaitingQueueCommand.CreateToken(token, TokenStatus.WAITING, null);
+        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token);
         WaitingQueueTokenInfo waitingQueueTokenInfo = waitingQueueService.createQueueToken(command);
         assertThat(waitingQueueTokenInfo.getToken()).isEqualTo(token);
     }
@@ -63,30 +60,14 @@ public class WaitingQueueTokenRedisIntegrationTest {
     void getWaitingQueue() {
         // given
         String token = UUIDGenerator.generateTimestampUUID();
-        WaitingQueueCommand.CreateToken command = new WaitingQueueCommand.CreateToken(token, TokenStatus.WAITING, null);
+        WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token);
         waitingQueueService.createQueueToken(command);
         // when
         WaitingQueueQuery.GetToken query = new WaitingQueueQuery.GetToken(token);
-        WaitingQueueTokenInfo getTokenInfo = waitingQueueService.getQueueToken(query);
+        WaitingQueueTokenInfo getTokenInfo = waitingQueueService.getWaitingQueueToken(query);
         // then
         assertThat(getTokenInfo.getToken()).isEqualTo(token);
-        assertThat(getTokenInfo.getTokenStatus()).isEqualTo(command.status());
-    }
-
-    @DisplayName("주어진 token 값에 대한 순서 조회 시 활성화 되었지만 이미 만료된 토큰일 경우 예외가 발생한다.")
-    @Test
-    void getWaitingQueueOrderWhenTokenIsExpired() {
-        // given
-        String token = UUIDGenerator.generateTimestampUUID();
-        WaitingQueueCommand.CreateToken command = new WaitingQueueCommand.CreateToken(token, TokenStatus.ACTIVATE, LocalDateTime.now().minusMinutes(20L));
-        waitingQueueService.createQueueToken(command);
-        // when
-        WaitingQueueQuery.GetToken query = new WaitingQueueQuery.GetToken(token);
-        // then
-        assertThatThrownBy(() -> waitingQueueService.getQueueTokenOrder(query))
-                .isInstanceOfSatisfying(DomainException.class, ex -> {
-                    assertThat(ex.getDomainError()).isEqualTo(WaitingQueueError.TOKEN_EXPIRED);
-                });
+        assertThat(getTokenInfo.getTokenStatus()).isEqualTo(TokenStatus.WAITING);
     }
 
     @DisplayName("대기열에 있는 토큰이 N개 일 때 M개 만큼 활성화되면 남은 대기열 토큰은 N-M개가 된다.")
@@ -98,7 +79,7 @@ public class WaitingQueueTokenRedisIntegrationTest {
         long activateTokenSize = 40;
         for (int i = 0; i < waitingTokenSize; i++) {
             String token = UUIDGenerator.generateTimestampUUID();
-            WaitingQueueCommand.CreateToken command = new WaitingQueueCommand.CreateToken(token, TokenStatus.WAITING, null);
+            WaitingQueueCommand.Create command = new WaitingQueueCommand.Create(token);
             waitingQueueService.createQueueToken(command);
         }
 

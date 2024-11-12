@@ -18,8 +18,6 @@ import org.lowell.concert.domain.user.model.UserAccount;
 import org.lowell.concert.domain.user.service.UserAccountService;
 import org.lowell.concert.domain.user.service.UserService;
 import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
-import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
-import org.lowell.concert.domain.waitingqueue.model.WaitingQueueToken;
 import org.lowell.concert.domain.waitingqueue.service.WaitingQueueService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

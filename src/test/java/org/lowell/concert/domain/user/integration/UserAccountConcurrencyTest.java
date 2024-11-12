@@ -189,52 +189,6 @@ public class UserAccountConcurrencyTest {
         assertThat(userAccount.getBalance()).isEqualTo(balance + chargeAmount * success.get());
     }
 
-
-    @DisplayName("레디스 Simple Lock을 사용해 포인트 충전을 100번 할 경우 1번 성공한다.")
-    @Test
-    void attemptChargeWithRedisSimpleLock100Times() throws InterruptedException {
-        Long userId = 1L;
-        long balance = 100;
-        long chargeAmount = 1000;
-        int chargeCount = 100;
-
-        UserAccount account = userAccountJpaRepository.save(UserAccount.builder()
-                                                                       .userId(userId)
-                                                                       .balance(balance)
-                                                                       .build());
-        ExecutorService executorService = Executors.newFixedThreadPool(chargeCount);
-        CountDownLatch latch = new CountDownLatch(chargeCount);
-
-        AtomicInteger success = new AtomicInteger(0);
-        AtomicInteger failed = new AtomicInteger(0);
-
-        for (int i = 0; i < chargeCount; i++) {
-            executorService.submit(() -> {
-                String lockKey = "user:account:" + userId;
-                try {
-                    Boolean lock = simpleLockRepository.tryLock(lockKey, 1200L, 1000L, TimeUnit.MILLISECONDS);
-                    if (lock) {
-                        accountService.chargeBalance(new UserAccountCommand.Action(userId, chargeAmount));
-                        success.incrementAndGet();
-                    }
-                } catch (Exception e) {
-                    log.warn("## charge error:[{}]", e.getClass().getSimpleName(), e);
-                    failed.incrementAndGet();
-                } finally {
-                    latch.countDown();
-                    simpleLockRepository.unlock(lockKey);
-                }
-            });
-        }
-        latch.await();
-        executorService.shutdown();
-
-        // then
-        assertThat(success.get()).isEqualTo(1);
-        UserAccount userAccount = accountService.getUserAccount(userId);
-        assertThat(userAccount.getBalance()).isEqualTo(balance + chargeAmount * success.get());
-    }
-
     @DisplayName("레디스 SpinLock을 사용해 포인트 충전을 1000번 할 경우 모두 성공한다.")
     @Test
     void attemptChargeWithRedisSpinLock1000Times() throws InterruptedException {

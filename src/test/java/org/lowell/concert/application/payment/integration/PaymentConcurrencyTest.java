@@ -14,17 +14,15 @@ import org.lowell.concert.domain.concert.model.ReservationStatus;
 import org.lowell.concert.domain.concert.model.SeatStatus;
 import org.lowell.concert.domain.user.model.User;
 import org.lowell.concert.domain.user.model.UserAccount;
-import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
-import org.lowell.concert.domain.waitingqueue.model.WaitingQueueToken;
+import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
+import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
+import org.lowell.concert.domain.waitingqueue.repository.WaitingQueueRepository;
 import org.lowell.concert.infra.db.concert.repository.ConcertReservationJpaRepository;
 import org.lowell.concert.infra.db.concert.repository.ConcertSeatJpaRepository;
 import org.lowell.concert.infra.db.user.repository.UserAccountJpaRepository;
 import org.lowell.concert.infra.db.user.repository.UserJpaRepository;
-import org.lowell.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
@@ -45,11 +43,11 @@ public class PaymentConcurrencyTest {
     @Autowired
     private ConcertReservationJpaRepository concertReservationJpaRepository;
     @Autowired
-    private WaitingQueueJpaRepository waitingQueueJpaRepository;
-    @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
     private UserAccountJpaRepository userAccountJpaRepository;
+    @Autowired
+    private WaitingQueueRepository waitingQueueRepository;
 
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
@@ -59,10 +57,6 @@ public class PaymentConcurrencyTest {
         databaseCleanUp.execute();
     }
 
-    @DynamicPropertySource
-    static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("waiting-queue.type", () -> "db");
-    }
 
     @DisplayName("같은 예약 건에 대해 결제 요청이 동시에 들어오면 하나만 성공한다.")
     @Test
@@ -80,13 +74,8 @@ public class PaymentConcurrencyTest {
                                                                        .balance(balance)
                                                                        .build());
 
-        WaitingQueueToken token = waitingQueueJpaRepository.save(WaitingQueueToken.builder()
-                                                                                  .tokenId(1L)
-                                                                                  .token("token")
-                                                                                  .tokenStatus(TokenStatus.ACTIVATE)
-                                                                                  .createdAt(LocalDateTime.now().minusMinutes(5))
-                                                                                  .expiresAt(LocalDateTime.now().plusMinutes(20))
-                                                                                  .build());
+        WaitingQueueTokenInfo token = waitingQueueRepository.createQueueToken(new WaitingQueueCommand.Create("token"));
+
 
         ConcertSeat seat = concertSeatJpaRepository.save(ConcertSeat.builder()
                                                                     .seatNo(1)
