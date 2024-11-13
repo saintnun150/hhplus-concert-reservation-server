@@ -39,7 +39,7 @@ public class ConcertScheduleCacheTest {
 
         // when
         for (int i = 0; i < count; i++) {
-            concertScheduleRepository.createConcertDate(
+            concertScheduleRepository.createConcertSchedule(
                     new ConcertScheduleCommand.Create((long) i, date, start, end)
             );
         }
@@ -62,7 +62,7 @@ public class ConcertScheduleCacheTest {
             executorService.execute(() -> {
                 for (int j = 0; j < threadCount; j++) {
                     try {
-                        concertScheduleService.getConcertSchedules(new ConcertScheduleQuery.SearchList(scheduleId, null));
+                        concertScheduleService.getConcertSchedules(new ConcertScheduleQuery.SearchList(scheduleId, null, null));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     } finally {
@@ -99,7 +99,7 @@ public class ConcertScheduleCacheTest {
             executorService.execute(() -> {
                 for (int j = 0; j < threadCount; j++) {
                     try {
-                        concertScheduleService.getConcertSchedulesWithCache(new ConcertScheduleQuery.SearchList(scheduleId, null));
+                        concertScheduleService.getConcertSchedulesWithCache(new ConcertScheduleQuery.SearchList(scheduleId, null, null));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     } finally {

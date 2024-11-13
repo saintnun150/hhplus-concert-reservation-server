@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -16,9 +17,16 @@ import java.util.Map;
 @Slf4j
 @Component
 public class GlobalLoggingInterceptor implements HandlerInterceptor {
+
+    @Value("${concert.api.logging.enable:true}")
+    private boolean loggingEnabled;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // request 정보 로깅
+        if (!loggingEnabled) {
+            return true;
+        }
         String requestURI = request.getRequestURI();
         String method = request.getMethod();
         String token = request.getHeader("X-Queue-Token");
@@ -53,12 +61,15 @@ public class GlobalLoggingInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        if (!loggingEnabled) {
+            return;
+        }
+
         // response 정보 로깅
         ContentCachingResponseWrapper responseWrapper = (ContentCachingResponseWrapper) response;
         byte[] responseArray = responseWrapper.getContentAsByteArray();
 
         String responseBody = new String(responseArray, responseWrapper.getCharacterEncoding());
-
         Map<String, Object> logMap = new HashMap<>();
         logMap.put("responseStatus", response.getStatus());
         logMap.put("responseBody", responseBody);

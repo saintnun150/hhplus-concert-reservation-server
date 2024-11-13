@@ -1,12 +1,12 @@
 package org.lowell.concert.infra.db.concert.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.lowell.concert.domain.concert.dto.ConcertCommand;
+import org.lowell.concert.domain.concert.dto.ConcertQuery;
 import org.lowell.concert.domain.concert.model.Concert;
 import org.lowell.concert.domain.concert.repository.ConcertRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,22 +15,25 @@ import java.util.Optional;
 public class ConcertRepositoryImpl implements ConcertRepository {
     private final ConcertJpaRepository jpaRepository;
 
-    @Override
-    public void createConcert(ConcertCommand.Create command) {
-        Concert entity = Concert.builder()
-                                .name(command.name())
-                                .createdAt(LocalDateTime.now())
-                                .build();
-        jpaRepository.save(entity);
-    }
-
-    @Override
     public Optional<Concert> getConcert(long concertId) {
         return jpaRepository.findById(concertId);
     }
 
     @Override
-    public List<Concert> getConcerts() {
-        return jpaRepository.findAllByDeletedAtIsNull();
+    public List<Concert> getConcerts(ConcertQuery.SearchList query) {
+        boolean hasName = StringUtils.hasText(query.name());
+        boolean hasFromAndTo = query.from() != null && query.to() != null;
+
+        if (hasName && hasFromAndTo) {
+            return jpaRepository.findAllByNameContainingAndOpenedAtBetween(query.name(), query.from(), query.to());
+        }
+        if (hasName) {
+            return jpaRepository.findAllByNameContaining(query.name());
+        }
+        if (hasFromAndTo) {
+            return jpaRepository.findAllByOpenedAtBetween(query.from(), query.to());
+        }
+        return jpaRepository.findAll();
     }
+
 }

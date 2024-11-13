@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class WaitingQueueRedisRepositoryImpl implements WaitingQueueRepository {
+public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
     private final RedisRepository redisRepository;
     private static final String WAITING_QUEUE_KEY_PREFIX = "waitingQueue";
     private static final String ACTIVATE_QUEUE_KEY_PREFIX = "activatedToken";

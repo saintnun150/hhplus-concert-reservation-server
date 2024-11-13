@@ -12,7 +12,7 @@ import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueQuery;
 import org.lowell.concert.domain.waitingqueue.model.TokenStatus;
 import org.lowell.concert.domain.waitingqueue.model.WaitingQueueTokenInfo;
 import org.lowell.concert.domain.waitingqueue.service.WaitingQueueService;
-import org.lowell.concert.infra.redis.waitingqueue.WaitingQueueRedisRepositoryImpl;
+import org.lowell.concert.infra.redis.waitingqueue.WaitingQueueRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -30,7 +30,7 @@ public class WaitingQueueTokenRedisIntegrationTest {
     private WaitingQueueService waitingQueueService;
 
     @Autowired
-    private WaitingQueueRedisRepositoryImpl waitingQueueRedisRepository;
+    private WaitingQueueRepositoryImpl waitingQueueRedisRepository;
 
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
@@ -86,7 +86,7 @@ public class WaitingQueueTokenRedisIntegrationTest {
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(ConcertPolicy.EXPIRED_QUEUE_MINUTES);
 
         // when
-        waitingQueueRedisRepository.activateWaitingToken(new WaitingQueueQuery.GetQueues(null, expiresAt, 40));
+        waitingQueueRedisRepository.activateWaitingToken(new WaitingQueueQuery.GetQueues(40, expiresAt));
         // then
         Long tokenCount = waitingQueueRedisRepository.findTokenCount(TokenStatus.WAITING);
         assertThat(tokenCount).isEqualTo(waitingTokenSize - activateTokenSize);
