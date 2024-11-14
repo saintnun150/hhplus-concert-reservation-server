@@ -20,9 +20,8 @@ public class PaymentService {
     }
 
     public Payment getPayment(Long paymentId) {
-        Payment payment = paymentRepository.getPayment(paymentId)
-                                           .orElseThrow(() -> DomainException.create(PaymentError.NOT_FOUND_PAYMENT, DomainException.createPayload(paymentId)));
-        return payment;
+        return paymentRepository.getPayment(paymentId)
+                                .orElseThrow(() -> DomainException.create(PaymentError.NOT_FOUND_PAYMENT, DomainException.createPayload(paymentId)));
     }
 
     public void deleteAll() {

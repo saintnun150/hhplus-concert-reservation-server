@@ -21,6 +21,7 @@ import org.lowell.concert.infra.db.user.repository.UserAccountJpaRepository;
 import org.lowell.concert.infra.db.user.repository.UserJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@ActiveProfiles("local")
 @SpringBootTest
 class PaymentFacadeTest {
     @Autowired
@@ -169,5 +171,38 @@ class PaymentFacadeTest {
                 .isInstanceOfSatisfying(DomainException.class, ex -> {
                     assertThat(ex.getDomainError()).isEqualTo(UserAccountError.EXCEED_BALANCE);
                 });
+    }
+
+    @DisplayName("결제 생성 확인")
+    @Test
+    void createPayment() {
+        int price = 10000;
+        long balance = 100000;
+        long concertScheduleId = 1L;
+        long seatId = 1L;
+        User user = userJpaRepository.save(User.builder()
+                                               .username("name")
+                                               .build());
+        userAccountJpaRepository.save(UserAccount.builder()
+                                                 .userId(user.getUserId())
+                                                 .balance(balance)
+                                                 .build());
+
+        ConcertSeat seat = concertSeatJpaRepository.save(ConcertSeat.builder()
+                                                                    .seatNo(1)
+                                                                    .concertScheduleId(concertScheduleId)
+                                                                    .status(SeatStatus.OCCUPIED)
+                                                                    .price(price)
+                                                                    .tempReservedAt(LocalDateTime.now().minusMinutes(3))
+                                                                    .build());
+
+        ConcertReservation saved = concertReservationJpaRepository.save(ConcertReservation.builder()
+                                                                                          .userId(user.getUserId())
+                                                                                          .seatId(seatId)
+                                                                                          .status(ReservationStatus.PENDING)
+                                                                                          .build());
+
+        paymentFacade.payment(saved.getReservationId(), "lowellToken");
+
     }
 }

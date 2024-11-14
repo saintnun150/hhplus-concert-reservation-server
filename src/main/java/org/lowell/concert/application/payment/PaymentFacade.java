@@ -1,6 +1,8 @@
 package org.lowell.concert.application.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.lowell.concert.domain.waitingqueue.event.WaitingQueueEvent;
+import org.lowell.concert.domain.payment.event.PaymentEventPublisher;
 import org.lowell.concert.domain.support.lock.DistributedLock;
 import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.concert.dto.ConcertReservationQuery;
@@ -17,7 +19,6 @@ import org.lowell.concert.domain.user.model.User;
 import org.lowell.concert.domain.user.model.UserAccount;
 import org.lowell.concert.domain.user.service.UserAccountService;
 import org.lowell.concert.domain.user.service.UserService;
-import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
 import org.lowell.concert.domain.waitingqueue.service.WaitingQueueService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ public class PaymentFacade {
     private final UserAccountService userAccountService;
     private final ConcertSeatService concertSeatService;
     private final ConcertReservationService concertReservationService;
+    private final PaymentEventPublisher paymentEventPublisher;
     private final WaitingQueueService waitingQueueService;
 
     @DistributedLock(lockKey = "#reservationId")
@@ -54,7 +56,7 @@ public class PaymentFacade {
 
         reservation.completeReservation(paymentTime);
 
-        waitingQueueService.expireQueueToken(new WaitingQueueCommand.ExpireToken(token, paymentTime));
+        paymentEventPublisher.publish(WaitingQueueEvent.ExpireTokenEvent.of(token));
 
         Payment payment = paymentService.createPayment(new PaymentCommand.Create(reservation.getReservationId(),
                                                                                  price,
