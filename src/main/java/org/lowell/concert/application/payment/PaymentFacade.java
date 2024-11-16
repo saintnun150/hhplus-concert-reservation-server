@@ -1,7 +1,6 @@
 package org.lowell.concert.application.payment;
 
 import lombok.RequiredArgsConstructor;
-import org.lowell.concert.domain.support.lock.DistributedLock;
 import org.lowell.concert.domain.concert.ConcertPolicy;
 import org.lowell.concert.domain.concert.dto.ConcertReservationQuery;
 import org.lowell.concert.domain.concert.dto.ConcertSeatQuery;
@@ -10,15 +9,16 @@ import org.lowell.concert.domain.concert.model.ConcertSeat;
 import org.lowell.concert.domain.concert.service.ConcertReservationService;
 import org.lowell.concert.domain.concert.service.ConcertSeatService;
 import org.lowell.concert.domain.payment.dto.PaymentCommand;
+import org.lowell.concert.domain.payment.event.PaymentEventPublisher;
 import org.lowell.concert.domain.payment.model.Payment;
 import org.lowell.concert.domain.payment.model.PaymentStatus;
 import org.lowell.concert.domain.payment.service.PaymentService;
+import org.lowell.concert.domain.support.lock.DistributedLock;
 import org.lowell.concert.domain.user.model.User;
 import org.lowell.concert.domain.user.model.UserAccount;
 import org.lowell.concert.domain.user.service.UserAccountService;
 import org.lowell.concert.domain.user.service.UserService;
-import org.lowell.concert.domain.waitingqueue.dto.WaitingQueueCommand;
-import org.lowell.concert.domain.waitingqueue.service.WaitingQueueService;
+import org.lowell.concert.domain.waitingqueue.event.WaitingQueueEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +32,7 @@ public class PaymentFacade {
     private final UserAccountService userAccountService;
     private final ConcertSeatService concertSeatService;
     private final ConcertReservationService concertReservationService;
-    private final WaitingQueueService waitingQueueService;
+    private final PaymentEventPublisher paymentEventPublisher;
 
     @DistributedLock(lockKey = "#reservationId")
     @Transactional
@@ -54,7 +54,7 @@ public class PaymentFacade {
 
         reservation.completeReservation(paymentTime);
 
-        waitingQueueService.expireQueueToken(new WaitingQueueCommand.ExpireToken(token, paymentTime));
+        paymentEventPublisher.publish(WaitingQueueEvent.ExpireTokenEvent.of(token));
 
         Payment payment = paymentService.createPayment(new PaymentCommand.Create(reservation.getReservationId(),
                                                                                  price,
