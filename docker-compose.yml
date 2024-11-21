@@ -1,0 +1,53 @@
+version: '3.8'
+
+networks:
+  kafka_network:
+
+volumes:
+  Kafka00:
+    driver: local
+
+services:
+  ConcertKafkaBroker01:
+    image: bitnami/kafka:3.7.0
+    restart: unless-stopped
+    container_name: ConcertKafkaContainer
+    ports:
+      - '9092:9092' # 내부 네트워크에서 카프카로 연결 포트
+      - '10000:10000' # 외부에서 카프카로 연결 포트
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_BROKER_ID=0
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_KRAFT_CLUSTER_ID=0R6RUcdDiW7heMZ
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@ConcertKafkaBroker01:9093
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:10000
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://ConcertKafkaBroker01:9092,EXTERNAL://localhost:10000
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_CFG_NUM_PARTITIONS=1
+    networks:
+      - kafka_network
+    volumes:
+      - Kafka00:/bitnami/kafka
+
+  KafkaWebUiService:
+    image: provectuslabs/kafka-ui:latest
+    restart: unless-stopped
+    container_name: KafkaWebUiContainer
+    ports:
+      - '8085:8080'
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=Local-Kraft-Cluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=ConcertKafkaBroker01:9092
+      - DYNAMIC_CONFIG_ENABLED=true
+    depends_on:
+      - ConcertKafkaBroker01
+    networks:
+      - kafka_network
