@@ -16,6 +16,7 @@ import org.lowell.apps.payment.domain.event.PaymentEvent;
 import org.lowell.apps.payment.domain.event.PaymentEventPublisher;
 import org.lowell.apps.payment.domain.model.Payment;
 import org.lowell.apps.payment.domain.model.PaymentStatus;
+import org.lowell.apps.payment.domain.service.PaymentOutBoxService;
 import org.lowell.apps.payment.domain.service.PaymentService;
 import org.lowell.apps.user.domain.model.User;
 import org.lowell.apps.user.domain.model.UserAccount;
@@ -35,6 +36,7 @@ public class PaymentFacade {
     private final UserAccountService userAccountService;
     private final ConcertSeatService concertSeatService;
     private final ConcertReservationService concertReservationService;
+    private final PaymentOutBoxService paymentOutBoxService;
     private final PaymentEventPublisher paymentEventPublisher;
 
     @DistributedLock(lockKey = "#reservationId")
@@ -66,6 +68,10 @@ public class PaymentFacade {
                                     payment.getReservationId(),
                                     payment.getPayAmount(),
                                     payment.getCreatedAt());
+    }
+
+    public void republishEvent() {
+        paymentOutBoxService.republishPaymentOutBox();
     }
 
 }
