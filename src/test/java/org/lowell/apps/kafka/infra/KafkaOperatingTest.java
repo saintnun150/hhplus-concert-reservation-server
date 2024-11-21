@@ -19,9 +19,9 @@ import static org.awaitility.Awaitility.await;
 
 @Slf4j
 @SpringBootTest
-@EmbeddedKafka(partitions = 1,
-        brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"},
-        ports = 9092)
+//@EmbeddedKafka(partitions = 1,
+//        brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"},
+//        ports = 9092)
 public class KafkaOperatingTest {
 
     @Autowired
