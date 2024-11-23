@@ -9,6 +9,7 @@ import org.lowell.apps.waitingqueue.domain.service.WaitingQueueService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Component
@@ -38,5 +39,9 @@ public class WaitingQueueFacade {
 
     public void checkActivateToken(String token) {
         waitingQueueService.checkActivateToken(new WaitingQueueQuery.GetToken(token));
+    }
+
+    public void expireQueueToken(String token) {
+        waitingQueueService.expireQueueToken(new WaitingQueueCommand.ExpireToken(token, LocalDateTime.now()));
     }
 }

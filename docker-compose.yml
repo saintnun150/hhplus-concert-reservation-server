@@ -6,6 +6,8 @@ networks:
 volumes:
   Kafka00:
     driver: local
+  redis_data:
+    driver: local
 
 services:
   ConcertKafkaBroker01:
@@ -51,3 +53,12 @@ services:
       - ConcertKafkaBroker01
     networks:
       - kafka_network
+
+  redis:
+    image: bitnami/redis:latest
+    ports:
+      - '6379:6379'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - redis_data:/bitnami/redis/data

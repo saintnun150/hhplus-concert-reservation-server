@@ -1,6 +1,9 @@
 package org.lowell.apps.payment.application;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.lowell.apps.common.lock.DistributedLock;
+import org.lowell.apps.common.util.UUIDGenerator;
 import org.lowell.apps.concert.domain.ConcertPolicy;
 import org.lowell.apps.concert.domain.dto.ConcertReservationQuery;
 import org.lowell.apps.concert.domain.dto.ConcertSeatQuery;
@@ -9,21 +12,22 @@ import org.lowell.apps.concert.domain.model.ConcertSeat;
 import org.lowell.apps.concert.domain.service.ConcertReservationService;
 import org.lowell.apps.concert.domain.service.ConcertSeatService;
 import org.lowell.apps.payment.domain.dto.PaymentCommand;
+import org.lowell.apps.payment.domain.event.PaymentEvent;
 import org.lowell.apps.payment.domain.event.PaymentEventPublisher;
 import org.lowell.apps.payment.domain.model.Payment;
 import org.lowell.apps.payment.domain.model.PaymentStatus;
+import org.lowell.apps.payment.domain.service.PaymentOutBoxService;
 import org.lowell.apps.payment.domain.service.PaymentService;
-import org.lowell.apps.common.lock.DistributedLock;
 import org.lowell.apps.user.domain.model.User;
 import org.lowell.apps.user.domain.model.UserAccount;
 import org.lowell.apps.user.domain.service.UserAccountService;
 import org.lowell.apps.user.domain.service.UserService;
-import org.lowell.apps.waitingqueue.domain.event.WaitingQueueEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PaymentFacade {
@@ -32,6 +36,7 @@ public class PaymentFacade {
     private final UserAccountService userAccountService;
     private final ConcertSeatService concertSeatService;
     private final ConcertReservationService concertReservationService;
+    private final PaymentOutBoxService paymentOutBoxService;
     private final PaymentEventPublisher paymentEventPublisher;
 
     @DistributedLock(lockKey = "#reservationId")
@@ -54,7 +59,7 @@ public class PaymentFacade {
 
         reservation.completeReservation(paymentTime);
 
-        paymentEventPublisher.publish(WaitingQueueEvent.ExpireTokenEvent.of(token));
+        paymentEventPublisher.publish(PaymentEvent.CompletedPayment.of(UUIDGenerator.generateTimestampUUID(), token));
 
         Payment payment = paymentService.createPayment(new PaymentCommand.Create(reservation.getReservationId(),
                                                                                  price,
@@ -65,5 +70,8 @@ public class PaymentFacade {
                                     payment.getCreatedAt());
     }
 
+    public void republishEvent() {
+        paymentOutBoxService.republishPaymentOutBox();
+    }
 
 }
