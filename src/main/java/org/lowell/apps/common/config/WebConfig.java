@@ -28,7 +28,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private String[] getWaitingFilterUrlPatterns() {
         String basePath = "/api/v1";
-        List<String> endpoints = Arrays.asList("/payments/*", "/concerts/*", "/waiting-queues/tokens");
+        List<String> endpoints = Arrays.asList("/payments/*", "/concerts/*");
         return endpoints.stream()
                         .map(endpoint -> basePath + endpoint)
                         .toArray(String[]::new);
