@@ -8,6 +8,7 @@ import org.springframework.boot.logging.LogLevel;
 @Getter
 public enum WaitingQueueError implements DomainError {
     NOT_FOUND_TOKEN(ErrorCode.NOT_FOUND, "Token Not Found", LogLevel.WARN),
+    NOT_FOUND_ACTIVATE_TOKEN(ErrorCode.NOT_FOUND, "ACTIVE Token Not Found", LogLevel.WARN),
     INVALID_TOKEN_INPUT(ErrorCode.BAD_REQUEST,  "Token must exist", LogLevel.DEBUG),
     INVALID_TOKEN_STATUS_INPUT(ErrorCode.BAD_REQUEST,  "Token status must exist or valid value", LogLevel.DEBUG),
     NOT_WAITING_STATUS(ErrorCode.VALIDATION,  "Token status is not waiting status", LogLevel.WARN),

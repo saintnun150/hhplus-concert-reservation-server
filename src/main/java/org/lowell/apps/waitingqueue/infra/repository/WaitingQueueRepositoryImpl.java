@@ -45,7 +45,7 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
 
     @Override
     public Optional<WaitingQueueTokenInfo> findActivateQueueToken(WaitingQueueQuery.GetToken query) {
-        return Optional.ofNullable(redisRepository.getValue(query.token()))
+        return Optional.ofNullable(redisRepository.getValue(ACTIVATE_QUEUE_KEY_PREFIX + query.token()))
                        .map(value -> LocalDateTime.parse((String) value, DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                        .map(expiresAt -> new WaitingQueueTokenInfo(query.token(), TokenStatus.ACTIVATE, expiresAt));
     }
