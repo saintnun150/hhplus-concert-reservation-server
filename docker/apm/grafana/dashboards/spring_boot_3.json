@@ -3117,7 +3117,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "prometheusdatasource"
         },
         "definition": "label_values(jvm_info,application)",
         "hide": 0,
@@ -3143,7 +3143,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "prometheusdatasource"
         },
         "definition": "label_values(jvm_info,namespace)",
         "hide": 0,
@@ -3165,7 +3165,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "prometheusdatasource"
         },
         "definition": "label_values(jvm_info{application=\"$application\", namespace=\"$Namespace\"},instance)",
         "hide": 0,
@@ -3191,7 +3191,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "prometheusdatasource"
         },
         "definition": "",
         "hide": 0,
@@ -3217,7 +3217,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "prometheusdatasource"
         },
         "definition": "label_values(jvm_memory_used_bytes{application=\"$application\", instance=\"$instance\", area=\"heap\"},id)",
         "hide": 0,
@@ -3243,7 +3243,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "prometheusdatasource"
         },
         "definition": "label_values(jvm_memory_used_bytes{application=\"$application\", instance=\"$instance\", area=\"nonheap\"},id)",
         "hide": 0,
