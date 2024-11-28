@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class WaitingQueueScheduler {
     private final WaitingQueueFacade waitingQueueFacade;
 
-    @Scheduled(fixedRate = 1000 * 60)
+    @Scheduled(fixedRate = 1000 * 20)
     public void activateReadyTokens() {
         try {
             waitingQueueFacade.activateReadyWaitingQueues();
