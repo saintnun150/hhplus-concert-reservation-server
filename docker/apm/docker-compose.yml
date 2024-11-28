@@ -52,7 +52,8 @@ services:
       - K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM=true
     volumes:
       - ./k6/scripts:/scripts
-#    command: run -o experimental-prometheus-rw /scripts/test.js
+    command: run -o experimental-prometheus-rw /scripts/token-create-and-polling-test-1.js
+#    command: run -o experimental-prometheus-rw /scripts/reservation-and-payment-test-1.js
     depends_on:
       - prometheus
 
