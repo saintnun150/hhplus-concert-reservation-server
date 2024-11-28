@@ -49,7 +49,7 @@ public class ConcertController implements ConcertApiDocs {
     @PostMapping("/{concertId}/schedules/{scheduleId}/reservations")
     public ApiResponse<ConcertResponse.ReservationInfo> createConcertReservation(@PathVariable Long concertId,
                                                                                  @PathVariable Long scheduleId,
-                                                                                 ConcertRequest.Reservation request,
+                                                                                 @RequestBody ConcertRequest.Reservation request,
                                                                                  @RequestHeader("X-QUEUE-TOKEN") String token) {
 
         ConcertInfo.ReservationInfo reservationInfo = concertFacade.reserveConcertSeat(request.getSeatId(), request.getUserId());
