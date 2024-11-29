@@ -35,7 +35,7 @@ public class WaitingQueueService {
     // 참가열 토큰조회
     public WaitingQueueTokenInfo getActivateQueueToken(WaitingQueueQuery.GetToken query) {
         return queueRepository.findActivateQueueToken(query)
-                              .orElseThrow(() -> DomainException.create(WaitingQueueError.NOT_FOUND_TOKEN));
+                              .orElseThrow(() -> DomainException.create(WaitingQueueError.NOT_FOUND_ACTIVATE_TOKEN));
     }
 
     // 대기열 순서 조회
