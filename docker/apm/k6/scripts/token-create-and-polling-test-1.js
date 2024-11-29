@@ -25,8 +25,10 @@ export const options = {
             executor: 'ramping-vus',
             startVUs: 0,
             stages: [
-                { duration: '20s', target: 5000 }, // 20초 동안 5000명으로 증가
-                { duration: '10s', target: 6000 }, // 10초 동안 6000명으로 증가
+                { duration: '1m', target: 3000 }, // 1분 동안 3000명으로 증가
+                { duration: '3m', target: 3000 }, // 3분 동안 3000명으로 유지
+                { duration: '1m', target: 4000 }, // 1분 동안 4000으로 증가
+                { duration: '1m', target: 1000 }, // 1분 동안 1000으로 감소
                 { duration: '1m', target: 0 }, // 마지막 1분 동안 0으로 감소
             ],
             gracefulStop: '0s',
