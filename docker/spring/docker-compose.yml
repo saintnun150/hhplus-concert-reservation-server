@@ -1,4 +1,4 @@
-version: '3.8'
+#version: '3.8'
 
 networks:
   kafka_network:
@@ -11,8 +11,8 @@ volumes:
     driver: local
   redis_data:
     driver: local
-  mysql_data:
-    driver: local
+#  mysql_data:
+#    driver: local
 
 services:
   ConcertKafkaBroker01:
@@ -65,16 +65,17 @@ services:
     ports:
       - "8080:8080"
     environment:
-      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:+UseSerialGC" # JVM 옵션
-      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/concert_reservation"
-      SPRING_DATASOURCE_USERNAME: "root"
-      SPRING_DATASOURCE_PASSWORD: "root"
+      JAVA_TOOL_OPTIONS: "-Xms2000m -Xmx4000m" # JVM 옵션
+      SPRING_PROFILES_ACTIVE: "aws"
+#      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/concert_reservation"
+#      SPRING_DATASOURCE_USERNAME: "root"
+#      SPRING_DATASOURCE_PASSWORD: "root"
       SPRING_REDIS_HOST: "redis"
       SPRING_REDIS_PORT: 6379
       KAFKA_BOOTSTRAP_SERVERS: "ConcertKafkaBroker01:9092"
     depends_on:
       - redis
-      - mysql
+#      - mysql
       - ConcertKafkaBroker01
     networks:
       - kafka_network
@@ -83,7 +84,7 @@ services:
       resources:
         limits:
           cpus: "1.0"
-          memory: "1G"
+          memory: "4G"
         reservations:
           cpus: "0.5"
           memory: "1G"
@@ -99,15 +100,15 @@ services:
     networks:
       - default
 
-  mysql:
-    image: mysql:latest
-    container_name: ConcertMysqlContainer
-    ports:
-      - '3306:3306'
-    environment:
-        MYSQL_ROOT_PASSWORD: "root"
-        MYSQL_DATABASE: "concert_reservation"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - default
+#  mysql:
+#    image: mysql:latest
+#    container_name: ConcertMysqlContainer
+#    ports:
+#      - '3306:3306'
+#    environment:
+#        MYSQL_ROOT_PASSWORD: "root"
+#        MYSQL_DATABASE: "concert_reservation"
+#    volumes:
+#      - mysql_data:/var/lib/mysql
+#    networks:
+#      - default

@@ -2,6 +2,7 @@ package org.lowell.apps.concert.interfaces.api;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.lowell.apps.concert.application.ConcertFacade;
 import org.lowell.apps.concert.application.ConcertInfo;
 import org.lowell.apps.common.api.ApiResponse;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/concerts")
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class ConcertController implements ConcertApiDocs {
     @SecurityRequirement(name = "queueToken")
     @GetMapping
     public ApiResponse<List<ConcertResponse.Info>> getConcerts(@RequestHeader("X-QUEUE-TOKEN") String token, ConcertRequest.GetConcert dto) {
+        log.warn("### Get concert request");
         List<ConcertInfo.Info> concerts = concertFacade.getConcerts(dto.getConcertName(),
                                                                     dto.getFrom(),
                                                                     dto.getTo());

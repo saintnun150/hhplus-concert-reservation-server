@@ -74,7 +74,7 @@ public class GlobalLoggingInterceptor implements HandlerInterceptor {
         logMap.put("responseStatus", response.getStatus());
         logMap.put("responseBody", responseBody);
 
-        log.info("## GlobalLogging Response logMap: {}", toJson(logMap));
+//        log.info("## GlobalLogging Response logMap: {}", toJson(logMap));
         responseWrapper.copyBodyToResponse();
     }
 
